@@ -1,0 +1,4 @@
+geth: ../bin/geth.sh
+client: pnpm run dev
+paywall: sleep 2; pnpm run deploy && pnpm start
+solc: trap exit INT; while true; do (find ../contracts -name '*.sol'; ls ../bin/.solc-colors ../bin/solc-combined.sh) | entr -d ../bin/solc-combined.sh "contracts/*.sol"; done
