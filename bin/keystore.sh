@@ -6,6 +6,8 @@ else
     KEYSTORE_DIR="$1"
 fi
 
+# The private keys (PK) and their corresponding addresses are
+# generated from the following 12 word mnemonic sentence:
 MNEMONIC="network gain army age zebra tuna bracket fire fall section direct stay"
 
 DEPLOYER_PK=e33292da27178504b848586dcee3011a7e21ee6ed96f9df17487fd6518a128c7
