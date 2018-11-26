@@ -2,6 +2,7 @@
 
 KEYSTORE=$(dirname "$0")/../keystore
 ACCOUNTS=$($(dirname "$0")/keystore.sh "$KEYSTORE")
+APIS="shh,personal,net,eth,web3,txpool"
 
 set -x
 
@@ -12,14 +13,8 @@ geth \
     --password /dev/null \
     --verbosity 3 \
     --nousb \
-    --ipcdisable \
-    --rpc \
-    --rpcaddr 0.0.0.0 \
-    --rpccorsdomain "*" \
-    --rpcapi shh,personal,net,eth,web3 \
-    --ws \
-    --wsaddr 0.0.0.0 \
-    --wsorigins "*" \
-    --wsapi shh,personal,net,eth,web3,txpool \
+    --rpcaddr 0.0.0.0 --rpccorsdomain "*" --rpcapi "$APIS" \
+    --wsaddr 0.0.0.0 --wsorigins "*" --wsapi "$APIS" \
     --shh \
-    --rpcvhosts=* 
+    --rpcvhosts=* \
+    "$@"

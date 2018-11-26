@@ -18,8 +18,6 @@ devDependencies:
   beefy: 2.1.8
   bignumber.js: 7.2.1
   browserify: 16.2.3
-  chai: 4.2.0
-  jasmine-check: 1.0.0-rc.0
   jest: 23.6.0
   request: 2.88.0
   supertest-fetch: 1.2.2
@@ -332,10 +330,6 @@ packages:
     dev: true
     resolution:
       integrity: sha1-mZEtWRg2tab1s0XA8H7vwI/GXZE=
-  /assertion-error/1.1.0:
-    dev: true
-    resolution:
-      integrity: sha512-jgsaNduz+ndvGyFt3uSuWqvy4lCnIJiovtouQN5JZHOKCS2QuhEdbcQHFhVksz2N2U9hXJo8odG7ETyWlEeuDw==
   /assign-symbols/1.0.0:
     dev: true
     engines:
@@ -885,19 +879,6 @@ packages:
   /caseless/0.12.0:
     resolution:
       integrity: sha1-G2gcIf+EAzyCZUMJBolCDRhxUdw=
-  /chai/4.2.0:
-    dependencies:
-      assertion-error: 1.1.0
-      check-error: 1.0.2
-      deep-eql: 3.0.1
-      get-func-name: 2.0.0
-      pathval: 1.1.0
-      type-detect: 4.0.8
-    dev: true
-    engines:
-      node: '>=4'
-    resolution:
-      integrity: sha512-XQU3bhBukrOsQCuwZndwGcCVQHyZi53fQ6Ys1Fym7E4olpIqqZZhhoFJoaKVvV17lWQoXYwgWN2nF5crA8J2jw==
   /chalk/1.1.3:
     dependencies:
       ansi-styles: 2.2.1
@@ -921,10 +902,6 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha512-ObN6h1v2fTJSmUXoS3nMQ92LbDK9be4TV+6G+omQlGJFdcUX5heKi1LZ1YnRMIgwTLEj3E24bT6tYni50rlCfQ==
-  /check-error/1.0.2:
-    dev: true
-    resolution:
-      integrity: sha1-V00xLt2Iu13YkS6Sht1sCu1KrII=
   /chokidar/1.7.0:
     dependencies:
       anymatch: 1.3.2
@@ -1227,14 +1204,6 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha1-gKTdMjdIOEv6JICDYirt7Jgq3/M=
-  /deep-eql/3.0.1:
-    dependencies:
-      type-detect: 4.0.8
-    dev: true
-    engines:
-      node: '>=0.12'
-    resolution:
-      integrity: sha512-+QeIQyN5ZuO+3Uk5DYh6/1eKO0m0YmJFGNmFHGACpf1ClL1nmlV/p4gNgbl2pJGxgXb4faqo6UE+M5ACEMyVcw==
   /deep-is/0.1.3:
     dev: true
     resolution:
@@ -1915,10 +1884,6 @@ packages:
     dev: true
     resolution:
       integrity: sha512-3t6rVToeoZfYSGd8YoLFR2DJkiQrIiUrGcjvFX2mDw3bn6k2OtwHN0TNCLbBO+w8qTvimhDkv+LSscbJY1vE6w==
-  /get-func-name/2.0.0:
-    dev: true
-    resolution:
-      integrity: sha1-6td0q+5y4gQJQzoGY2YCPdaIekE=
   /get-stream/3.0.0:
     dev: true
     engines:
@@ -2631,12 +2596,6 @@ packages:
     dev: true
     resolution:
       integrity: sha512-+cfoZ0UXzWjhAdzosCPP3AN8vvef8XDkWtTfgaN+7L3YTpNYITnCaEkceo5SEYy644VkHka/P1FvkWvrG/rrJw==
-  /jasmine-check/1.0.0-rc.0:
-    dependencies:
-      testcheck: 1.0.0-rc.2
-    dev: true
-    resolution:
-      integrity: sha1-EXcowVAHjs8hGYbF8WQnW3HpN6Q=
   /jest-changed-files/23.4.2:
     dependencies:
       throat: 4.1.0
@@ -3808,10 +3767,6 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha1-WcRPfuSR2nBNpBXaWkBwuk+P5EE=
-  /pathval/1.1.0:
-    dev: true
-    resolution:
-      integrity: sha1-uULm1L3mUwBe9rcTYd74cn0GReA=
   /pbkdf2/3.0.17:
     dependencies:
       create-hash: 1.2.0
@@ -4899,10 +4854,6 @@ packages:
     dev: true
     resolution:
       integrity: sha512-SYbXgY64PT+4GAL2ocI3HwPa4Q4TBKm0cwAVeKOt/Aoc0gSpNRjJX8w0pA1LMKZ3LBmd8pYBqApFNQLII9kavA==
-  /testcheck/1.0.0-rc.2:
-    dev: true
-    resolution:
-      integrity: sha1-ETVqJbhFde/gsIV0UehbX6dO5OQ=
   /throat/4.1.0:
     dev: true
     resolution:
@@ -5059,12 +5010,6 @@ packages:
       node: '>= 0.8.0'
     resolution:
       integrity: sha1-WITKtRLPHTVeP7eE8wgEsrUg23I=
-  /type-detect/4.0.8:
-    dev: true
-    engines:
-      node: '>=4'
-    resolution:
-      integrity: sha512-0fr/mIH1dlO+x7TlcMy+bIDqKPsw/70tVyeHW787goQjhmqaZe10uwLujubK9q9Lg6Fiho1KUKDYz0Z7k7g5/g==
   /type-is/1.6.16:
     dependencies:
       media-typer: 0.3.0
@@ -5634,12 +5579,10 @@ specifiers:
   bignumber.js: 7.2.1
   body-parser: 1.18.3
   browserify: 16.2.3
-  chai: 4.2.0
   cors: 2.8.5
   errorhandler: 1.5.0
   ethereumjs-util: ^6.0.0
   express: 4.16.4
-  jasmine-check: 1.0.0-rc.0
   jest: 23.6.0
   lorem-ipsum: ^1.0.6
   lowdb: 1.0.0

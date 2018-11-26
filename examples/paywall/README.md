@@ -29,10 +29,10 @@ network gain army age zebra tuna bracket fire fall section direct stay
 The first 4 accounts are used by both the automated tests and the demo.
 We call them:
 
-* Deployer (Account 1)
-* Alice (Account 2)
-* Bob (Account 3)
-* Eve (Account 4)
+1. Deployer
+1. Alice
+1. Bob
+1. Eve
 
 In this demo Alice and Eve acts as a _Reader_ and _Bob_ assumes the
 _Publisher_ role.
@@ -54,10 +54,12 @@ which generates them deterministically from the seed phrase above.
 We also deploy a very simple, ERC20 token, with 0 decimal precision
 and a huge total supply, which is originally owned by the Deployer account.
 
+This is the token our example uses as the currency for its payments.
+
 You can find the address of this token in the `sprites-config.json` file's
 `token` key. In Metamask there is an _ADD TOKEN_ feature, where you
-can provide this address (for every account) and see how their token balances
-change.
+can provide this address (for every account), then follow how their
+token balances change, while using the paywall.
 
 Contracts, including this token contract is redeployed every time you (re)start
 the application, so you have to add the tokens again to Metamask with their new

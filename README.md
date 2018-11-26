@@ -12,4 +12,4 @@ folders.
 
 ## Examples
 
-* [Paywall](paywall/README.md)
+* [Paywall](examples/paywall/README.md)

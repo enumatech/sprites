@@ -4,3 +4,6 @@ envFile
 pnpm-debug.log
 out/
 .DS_Store
+keystore/
+chaindata/
+test-chain.ipc
