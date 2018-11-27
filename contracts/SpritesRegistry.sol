@@ -1,6 +1,6 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 // XXX enable returning structs from internal functions
-//pragma experimental ABIEncoderV2;
+pragma experimental ABIEncoderV2;
 
 import "./PreimageManagerInterface.sol";
 import "./ERC20Interface.sol";
@@ -89,7 +89,7 @@ contract SpritesRegistry {
         payment.expiry = 0;
         payment.amount = 0;
         payment.preimageHash = bytes32(0);
-        payment.recipient = 0;
+        payment.recipient = address(0x0);
 
         channel.payment = payment;
 
@@ -110,7 +110,7 @@ contract SpritesRegistry {
 
     function getPlayers(uint chId)
     public view
-    returns (address[2]) {
+    returns (address[2] memory) {
         Channel storage ch = channels[chId];
         return [ch.left.addr, ch.right.addr];
     }
@@ -141,7 +141,7 @@ contract SpritesRegistry {
     public onlyplayers(chId)
     returns (bool) {
         Channel storage ch = channels[chId];
-        bool status = ERC20Interface(ch.tokenAddress).transferFrom(msg.sender, this, amount);
+        bool status = ERC20Interface(ch.tokenAddress).transferFrom(msg.sender, address(this), amount);
 
         // return status 0 if transfer failed, 1 otherwise
         require(status == true);
@@ -159,7 +159,7 @@ contract SpritesRegistry {
 
         require(ch.left.addr == who || ch.right.addr == who);
         ERC20Interface token = ERC20Interface(ch.tokenAddress);
-        bool status = token.transferFrom(msg.sender, this, amount);
+        bool status = token.transferFrom(msg.sender, address(this), amount);
         require(status == true);
         Player storage player = (ch.left.addr == who) ? ch.left : ch.right;
         player.deposit = Math.add(player.deposit, amount);
@@ -194,11 +194,11 @@ contract SpritesRegistry {
     // XXX the experimental ABI encoder supports return struct, but as of 2018 04 08
     // web3.py does not seem to support decoding structs.
     function getState(uint chId)
-    public constant onlyplayers(chId)
+    public view onlyplayers(chId)
     returns (
-        uint[2] deposits,
-        int[2] credits,
-        uint[2] withdrawals,
+        uint[2] memory deposits,
+        int[2] memory credits,
+        uint[2] memory withdrawals,
         int round,
         bytes32 preimageHash,
         address recipient,
@@ -225,24 +225,22 @@ contract SpritesRegistry {
 
     function serializeState(
         uint chId,
-        int[2] credits,
-        uint[2] withdrawals,
+        int[2] memory credits,
+        uint[2] memory withdrawals,
         int round,
         bytes32 preimageHash,
         address recipient,
         uint amount,
         uint expiry)
-    public pure
-    returns (bytes) {
-        return abi.encodePacked(
+    public view
+    returns (bytes memory) {
+        return abi.encode(
             chId, credits, withdrawals, round, preimageHash,
-        // Addresses are 20 bytes, but currently the client code
-        // pads every input to 32 bytes.
-            bytes32(recipient), amount, expiry);
+            recipient, amount, expiry);
     }
 
     // providing this separtely to test from application code
-    function recoverAddress(bytes32 msgHash, uint[3] sig)
+    function recoverAddress(bytes32 msgHash, uint[3] memory sig)
     public pure
     returns (address) {
         uint8 V = uint8(sig[0]);
@@ -251,7 +249,7 @@ contract SpritesRegistry {
         return ecrecover(msgHash, V, R, S);
     }
 
-    function isSignatureOkay(address signer, bytes32 msgHash, uint[3] sig)
+    function isSignatureOkay(address signer, bytes32 msgHash, uint[3] memory sig)
     public pure
     returns (bool) {
         require(signer == recoverAddress(msgHash, sig));
@@ -263,14 +261,14 @@ contract SpritesRegistry {
 
     function verifyUpdate(
         uint chId,
-        int[2] credits,
-        uint[2] withdrawals,
+        int[2] memory credits,
+        uint[2] memory withdrawals,
         int round,
         bytes32 preimageHash,
         address recipient,
         uint amount,
         uint expiry,
-        uint[3] sig)
+        uint[3] memory sig)
     public view onlyplayers(chId)
     returns (bool) {
         // Do not allow overpayment.
@@ -287,8 +285,8 @@ contract SpritesRegistry {
             abi.encodePacked(
                 chSigPrefix,
                 serializeState(
-                    chId, credits, withdrawals, round,
-                    preimageHash, recipient, amount, expiry)));
+                    chId, credits, withdrawals, round, preimageHash,
+                    recipient, amount, expiry)));
 
         Player storage other = lookupOtherPlayer(chId);
         return isSignatureOkay(other.addr, stateHash, sig);
@@ -296,14 +294,14 @@ contract SpritesRegistry {
 
     function update(
         uint chId,
-        int[2] credits,
-        uint[2] withdrawals,
+        int[2] memory credits,
+        uint[2] memory withdrawals,
         int round,
         bytes32 preimageHash,
         address recipient,
         uint amount,
         uint expiry,
-        uint[3] sig)
+        uint[3] memory sig)
     public onlyplayers(chId) {
         verifyUpdate(
             chId, credits, withdrawals, round, preimageHash,
@@ -318,8 +316,8 @@ contract SpritesRegistry {
 
     function updatePlayers(
         uint chId,
-        int[2] credits,
-        uint[2] withdrawals)
+        int[2] memory credits,
+        uint[2] memory withdrawals)
     private {
         Player storage left = channels[chId].left;
         Player storage right = channels[chId].right;
@@ -359,14 +357,14 @@ contract SpritesRegistry {
     // number of transactions in best-case scenarios.
     function updateAndWithdraw(
         uint chId,
-        int[2] credits,
-        uint[2] withdrawals,
+        int[2] memory credits,
+        uint[2] memory withdrawals,
         int round,
         bytes32 preimageHash,
         address recipient,
         uint amount,
         uint expiry,
-        uint[3] sig)
+        uint[3] memory sig)
     public onlyplayers(chId) {
         update(chId, credits, withdrawals, round,
             preimageHash, recipient, amount, expiry, sig);
@@ -405,7 +403,7 @@ contract SpritesRegistry {
             payment.amount = 0;
             payment.preimageHash = bytes32(0);
             payment.expiry = 0;
-            payment.recipient = 0x0;
+            payment.recipient = address(0x0);
         }
 
         // Withdraw the maximum amounts left in the channel

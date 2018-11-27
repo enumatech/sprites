@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
 // ----------------------------------------------------------------------------
 // ERC20Token - Standard ERC20 Implementation
@@ -25,7 +25,13 @@ contract ERC20Token is ERC20Interface {
    mapping(address => mapping (address => uint256)) allowed;
 
 
-   constructor(string _name, string _symbol, uint8 _decimals, uint256 _totalSupply, address _initialTokenHolder) public {
+   constructor(
+      string memory _name,
+      string memory _symbol,
+      uint8 _decimals,
+      uint256 _totalSupply,
+      address _initialTokenHolder)
+   public {
       tokenName = _name;
       tokenSymbol = _symbol;
       tokenDecimals = _decimals;
@@ -35,16 +41,16 @@ contract ERC20Token is ERC20Interface {
       balances[_initialTokenHolder] = _totalSupply;
 
       // Per EIP20, the constructor should fire a Transfer event if tokens are assigned to an account.
-      emit Transfer(0x0, _initialTokenHolder, _totalSupply);
+      emit Transfer(address(0x0), _initialTokenHolder, _totalSupply);
    }
 
 
-   function name() public view returns (string) {
-      return tokenName;
+   function name() public view returns (string memory) {
+       return tokenName;
    }
 
 
-   function symbol() public view returns (string) {
+   function symbol() public view returns (string memory) {
       return tokenSymbol;
    }
 

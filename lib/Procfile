@@ -1,5 +1,5 @@
 dev-chain: ../bin/geth.sh --ipcdisable --rpc --datadir ../chaindata
 test-chain: ../bin/geth.sh --ipcpath ../test-chain.ipc --rpc --rpcport 9545
-client: pnpm run dev
-paywall: sleep 2; pnpm run deploy && pnpm start
-solc: trap exit INT; while true; do (find ../contracts -name '*.sol'; ls ../bin/.solc-colors ../bin/solc-combined.sh) | entr -d ../bin/solc-combined.sh "contracts/*.sol"; done
+client: npm run dev
+paywall: sleep 2; npm run deploy && npm start
+solc: trap exit INT; while true; do (find ../contracts -name '*.sol'; ls ../bin/.solc-colors ../bin/solc-combined.sh) | entr ../bin/solc-combined.sh "contracts/*.sol"; done

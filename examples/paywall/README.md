@@ -81,7 +81,7 @@ Wait a few minute until the "system dependencies" are downloaded for the
 
 ```
 cd lib/
-pnpm install
+npm install
 ```
 
 to acquire the Node.js dependencies.

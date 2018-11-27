@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+echo solc-combined args: "$@"
 in="$@"
 out=./out/out.json
 err=./out/err.txt

@@ -31,12 +31,9 @@ mkShell rec {
         grc
         entr
         nodejs-8_x
-        nodePackages_8_x.pnpm
     ];
 
     shellHook = ''
-        export PATH="$PATH:$PWD/merchant/node_modules/.bin"
-        print_module_version="console.log(process.versions.modules)"
-        export npm_config_store=''${NPM_STORE_PREFIX-$HOME}/.pnpm-store-abi-$(${nodejs-8_x}/bin/node -e $print_module_version)
+        export PATH="$PATH:$PWD/lib/node_modules/.bin"
         '';
 }
