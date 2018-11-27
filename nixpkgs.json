@@ -1,4 +1,4 @@
 {
-  "url": "https://nixos.org/channels/nixpkgs-unstable/nixexprs.tar.xz",
+  "url": "https://releases.nixos.org/nixpkgs/nixpkgs-19.03pre160446.206a1c00bae/nixexprs.tar.xz",
   "sha256": "02jjhfh1kswgb8xwp0fdvgs6s1sqg3fyib4jqp5msdql993hnlxy"
 }

@@ -23,6 +23,7 @@ mkShell rec {
     buildInputs = [
         coreutils
         curl
+        gawk
         git
         go-ethereum
         overmind
