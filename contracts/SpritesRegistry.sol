@@ -232,7 +232,7 @@ contract SpritesRegistry {
         address recipient,
         uint amount,
         uint expiry)
-    public view
+    public pure
     returns (bytes memory) {
         return abi.encode(
             chId, credits, withdrawals, round, preimageHash,
