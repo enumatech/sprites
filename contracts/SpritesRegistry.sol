@@ -13,7 +13,7 @@ contract SpritesRegistry {
     //using Math for uint256;
 
     // Blocks for grace period
-    uint constant DELTA = 10;
+    uint constant DELTA = 5;
 
     struct Player {
         address addr;
