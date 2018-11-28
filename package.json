@@ -2,7 +2,7 @@
   "name": "sprites",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "lib/sprites.js",
   "jest": {
     "testEnvironment": "node",
     "roots": [
