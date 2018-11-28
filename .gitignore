@@ -1,9 +1,9 @@
 node_modules/
 .overmind.sock
-envFile
 pnpm-debug.log
 out/
 .DS_Store
-keystore/
+keystore
+keystore-*/
 chaindata/
 test-chain.ipc

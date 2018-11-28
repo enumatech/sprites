@@ -7,7 +7,7 @@
 // ----------------------------------------------------------------------------
 
 const Web3Eth = require('web3-eth')
-const Sprites = require('./sprites.js')
+const Sprites = require('../../lib/sprites.js')
 
 const ethUrl = 'http://localhost:8545'
 

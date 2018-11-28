@@ -36,5 +36,6 @@ mkShell rec {
 
     shellHook = ''
         export PATH="$PATH:$PWD/lib/node_modules/.bin"
+        export OVERMIND_CAN_DIE=keystore
         '';
 }

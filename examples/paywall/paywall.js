@@ -7,7 +7,7 @@
 // ----------------------------------------------------------------------------
 
 const {curry, assoc, assocPath, project, values, prop} = require('ramda')
-const {thread, threadP} = require('./fp.js')
+const {thread, threadP} = require('../../lib/fp.js')
 const assert = require('assert')
 const {inspect} = require('util')
 const {
@@ -18,11 +18,11 @@ const {
     toUnsigned,
     hashPersonalMessage
 } = require('ethereumjs-util')
-const H = require('./test-helpers.js')
+const H = require('../../lib/test-helpers.js')
 const {address} = H
-const Sign = require('./sign.js')
-const ChannelState = require('./channel-state.js')
-const Sprites = require('./sprites.js')
+const Sign = require('../../lib/sign.js')
+const ChannelState = require('../../lib/channel-state.js')
+const Sprites = require('../../lib/sprites.js')
 
 const Paywall = {
     new() {

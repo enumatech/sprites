@@ -1,0 +1,2 @@
+client: npm run dev
+paywall: sleep 2; npm run deploy && npm start

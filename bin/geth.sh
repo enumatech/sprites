@@ -1,7 +1,14 @@
 #!/usr/bin/env bash
 
-KEYSTORE=$(dirname "$0")/../keystore
-ACCOUNTS=$($(dirname "$0")/keystore.sh "$KEYSTORE")
+export BASEDIR="$(dirname "$0")"
+KEYSTORE="$(realpath "$BASEDIR/../keystore")"
+
+while [ ! -d "$KEYSTORE" ]; do
+    echo "Waiting for keystore ($KEYSTORE)..."
+    sleep 0.3
+done
+
+ACCOUNTS=$("$BASEDIR"/list-keystore.sh "$KEYSTORE")
 APIS="personal,net,eth,web3"
 
 set -x

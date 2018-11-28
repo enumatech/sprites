@@ -6,15 +6,15 @@
 // https://www.enuma.io/
 // ----------------------------------------------------------------------------
 
-const {newIpcProvider} = require('../test-helpers.js')
+const {newIpcProvider} = require('../../../lib/test-helpers.js')
 const {
     map, assoc, assocPath, range, indexBy, prop, dissoc, pluck, inc, sum
 } = require('ramda')
-const {thread, threadP, update, updatePath} = require('../fp.js')
+const {thread, threadP, update, updatePath} = require('../../../lib/fp.js')
 const Web3Eth = require('web3-eth')
-const ChannelState = require('../channel-state.js')
-const Sprites = require('../sprites.js')
-const OffChainRegistry = require('../off-chain-registry.js')
+const ChannelState = require('../../../lib/channel-state.js')
+const Sprites = require('../../../lib/sprites.js')
+const OffChainRegistry = require('../../../lib/off-chain-registry.js')
 const Paywall = require('../paywall.js')
 const PaywallClient = require('../paywall-client.js')
 

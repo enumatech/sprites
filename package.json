@@ -1,0 +1,35 @@
+{
+  "name": "sprites",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "jest": {
+    "testEnvironment": "node",
+    "roots": [
+      "<rootDir>/lib/",
+      "<rootDir>/out/"
+    ]
+  },
+  "scripts": {
+    "start": "node ./paywall-server.js",
+    "test": "jest --no-watchman",
+    "bundle": "browserify paywall-client-page.js -o public/paywall-client-page.js",
+    "dev": "beefy paywall-client-page.js --live --cwd public/ --debug=true",
+    "deploy": "node ./deploy-demo.js | tee sprites-config.json"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ethereumjs-util": "^6.0.0",
+    "lowdb": "1.0.0",
+    "ramda": "0.25.0",
+    "web3-eth": "1.0.0-beta.34",
+    "web3-eth-abi": "1.0.0-beta.34",
+    "web3-eth-contract": "1.0.0-beta.34"
+  },
+  "devDependencies": {
+    "bignumber.js": "7.2.1",
+    "jest": "23.6.0"
+  }
+}

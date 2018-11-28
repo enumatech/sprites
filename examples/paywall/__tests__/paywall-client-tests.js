@@ -7,14 +7,14 @@
 // ----------------------------------------------------------------------------
 
 const {indexBy, prop, assoc, dissoc, keys} = require('ramda')
-const {thread, threadP} = require('../fp.js')
+const {thread, threadP} = require('../../../lib/fp.js')
 const Web3Eth = require('web3-eth')
-const {ZERO_ADDR, newIpcProvider} = require('../test-helpers.js')
-const OffChainRegistry = require('../off-chain-registry.js')
+const {ZERO_ADDR, newIpcProvider} = require('../../../lib/test-helpers.js')
+const OffChainRegistry = require('../../../lib/off-chain-registry.js')
 const PaywallClient = require('../paywall-client.js')
 const Paywall = require('../paywall.js')
-const Sprites = require('../sprites.js')
-const ChannelState = require('../channel-state.js')
+const Sprites = require('../../../lib/sprites.js')
+const ChannelState = require('../../../lib/channel-state.js')
 
 describe('PaywallClient', () => {
     let PW, PWC0, web3Provider
