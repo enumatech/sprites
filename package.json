@@ -11,11 +11,8 @@
     ]
   },
   "scripts": {
-    "start": "node ./paywall-server.js",
-    "test": "jest --no-watchman",
-    "bundle": "browserify paywall-client-page.js -o public/paywall-client-page.js",
-    "dev": "beefy paywall-client-page.js --live --cwd public/ --debug=true",
-    "deploy": "node ./deploy-demo.js | tee sprites-config.json"
+    "start": "echo Nothing to start. Refer the README for instructions or run the tests with `npm test`.",
+    "test": "jest --no-watchman"
   },
   "keywords": [],
   "author": "",

@@ -1,2 +1,2 @@
-client: npm run dev
-paywall: sleep 2; npm run deploy && npm start
+reader: npm run reader
+publisher: npm run deploy && npm run publisher

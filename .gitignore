@@ -5,5 +5,5 @@ out/
 .DS_Store
 keystore
 keystore-*/
-chaindata/
+dev-chain/
 test-chain.ipc

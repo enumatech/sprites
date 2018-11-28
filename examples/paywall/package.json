@@ -11,11 +11,12 @@
     ]
   },
   "scripts": {
-    "start": "node ./paywall-server.js",
+    "start": "echo -e 'Follow the README, then start with:\n    overmind start'",
     "test": "jest --no-watchman",
-    "bundle": "browserify paywall-client-page.js -o public/paywall-client-page.js",
-    "dev": "beefy paywall-client-page.js --live --cwd public/ --debug=true",
-    "deploy": "node ./deploy-demo.js | tee sprites-config.json"
+    "deploy": "node ./deploy-demo.js | tee sprites-config.json",
+    "publisher": "node ./paywall-server.js",
+    "reader": "beefy paywall-client-page.js --live --cwd public/ --debug=true",
+    "bundle": "browserify paywall-client-page.js -o public/paywall-client-page.js"
   },
   "keywords": [],
   "author": "",
