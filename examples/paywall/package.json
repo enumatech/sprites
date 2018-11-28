@@ -18,6 +18,11 @@
     "reader": "beefy paywall-client-page.js --live --cwd public/ --debug=true",
     "bundle": "browserify paywall-client-page.js -o public/paywall-client-page.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/enumatech/sprites.git"
+  },
+  "homepage": "https://github.com/enumatech/sprites#readme",
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -40,7 +45,6 @@
   },
   "devDependencies": {
     "beefy": "2.1.8",
-    "bignumber.js": "7.2.1",
     "browserify": "16.2.3",
     "jest": "23.6.0",
     "request": "2.88.0",

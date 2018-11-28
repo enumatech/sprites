@@ -21,16 +21,19 @@ with import (
 mkShell rec {
     LC_ALL="en_US.UTF-8";
     buildInputs = [
-        coreutils
-        curl
-        gawk
-        git
-        go-ethereum
-        overmind
+        coreutils # for consistent command line options across OSes
+        curl # bin/update-nix.sh
+        gawk # bin/update-nix.sh bin/create-keystore.sh
+        git # for potential git nodejs dependencies
+        overmind # starting the env for tests and  examples with one command
+        entr # monitor file changes
+        jq # bin/update-nix.sh bin/solc-combined.sh
+        grc # bin/solc-combined.sh -- color compilation errors and warnings
+        (if stdenv.isDarwin
+         then null
+         else python) # compiling nodejs deps, like websocket, keccak, scrypt
+        go-ethereum # provides geth
         solc
-        jq
-        grc
-        entr
         nodejs-8_x
     ];
 

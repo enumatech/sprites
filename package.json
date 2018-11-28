@@ -14,6 +14,11 @@
     "start": "echo Nothing to start. Refer the README for instructions or run the tests with `npm test`.",
     "test": "jest --no-watchman"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/enumatech/sprites.git"
+  },
+  "homepage": "https://github.com/enumatech/sprites#readme",
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -26,7 +31,6 @@
     "web3-eth-contract": "1.0.0-beta.34"
   },
   "devDependencies": {
-    "bignumber.js": "7.2.1",
     "jest": "23.6.0"
   }
 }
