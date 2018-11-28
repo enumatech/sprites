@@ -19,7 +19,7 @@ geth \
     --unlock "$ACCOUNTS" \
     --password /dev/null \
     --verbosity 3 \
-    --nousb \
+    --nousb --nodiscover --nat none \
     --rpcaddr 0.0.0.0 --rpccorsdomain "*" --rpcapi "$APIS" \
     --wsaddr 0.0.0.0 --wsorigins "*" --wsapi "$APIS" \
     --rpcvhosts=* \
