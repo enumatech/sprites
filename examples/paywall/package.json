@@ -37,7 +37,7 @@
     "lorem-ipsum": "^1.0.6",
     "lowdb": "1.0.0",
     "node-fetch": "2.3.0",
-    "ramda": "0.25.0",
+    "ramda": "0.26.1",
     "sprites": "file:../..",
     "web3-eth": "1.0.0-beta.34",
     "web3-eth-abi": "1.0.0-beta.34",

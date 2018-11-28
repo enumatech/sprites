@@ -48,7 +48,6 @@ const Paywall = {
     },
 
     async catalog(paywall) {
-        // TODO: sent blurb instead of content
         const publicFields = ['id', 'price', 'title', 'blurb']
         return project(publicFields, values(paywall.db))
     },
