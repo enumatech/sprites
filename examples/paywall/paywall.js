@@ -156,6 +156,17 @@ const Paywall = {
     channel: curry(async (chId, paywall) => {
         const sprites = await Sprites.channelState({...paywall.sprites, chId})
         return {...paywall, sprites}
+    }),
+
+    /**
+     * Returns the off-chain balance of the paywall,
+     * irregardless of its player index.
+     *
+     * It's meant to be a testing convenience, hence not chainable.
+     * */
+    balance: curry(async (chId, paywall) => {
+        const {sprites} = await Paywall.channel(chId, paywall)
+        return ChannelState.balance(Sprites.ownIdx(sprites), sprites.channel)
     })
 }
 

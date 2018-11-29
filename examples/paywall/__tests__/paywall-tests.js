@@ -17,11 +17,6 @@ const OffChainRegistry = require('sprites/lib/off-chain-registry.js')
 const Paywall = require('../paywall.js')
 const PaywallClient = require('../paywall-client.js')
 
-async function balance(chId, paywall) {
-    const {sprites} = await Paywall.channel(chId, paywall)
-    return ChannelState.balance(Sprites.ownIdx(sprites), sprites.channel)
-}
-
 describe('Paywall', () => {
     let PW, PWC0, spritesTemplate, web3Provider
     const newArticle = (id) => new Object({
@@ -160,7 +155,7 @@ describe('Paywall', () => {
             let invoice, balanceBeforePayment
 
             beforeAll(async () => {
-                balanceBeforePayment = await balance(chId, PW)
+                balanceBeforePayment = await Paywall.balance(chId, PW)
                 ;({invoice} = await Paywall.invoice(order, PW))
             })
 
@@ -179,7 +174,7 @@ describe('Paywall', () => {
                 })
 
                 it('retains the channel balance', async () => {
-                    await expect(balance(chId, PW))
+                    await expect(Paywall.balance(chId, PW))
                         .resolves.toEqual(balanceBeforePayment)
                 })
             })
@@ -200,7 +195,7 @@ describe('Paywall', () => {
                 })
 
                 it('retains the channel balance', async () => {
-                    await expect(balance(chId, PW))
+                    await expect(Paywall.balance(chId, PW))
                         .resolves.toEqual(balanceBeforePayment)
                 })
             })
@@ -236,7 +231,7 @@ describe('Paywall', () => {
                 })
 
                 it('increases the channel balance', async () => {
-                    await expect(balance(chId, PW))
+                    await expect(Paywall.balance(chId, PW))
                         .resolves.toEqual(balanceBeforePayment + article.price)
                 })
 
@@ -297,7 +292,6 @@ describe('Paywall', () => {
 
         describe.skip('.withdraw', () => {
             it('works', async () => {
-
                 await expect(Paywall.withdraw(chId, PW))
                     .resolves.toMatch({x: "y"})
             })
