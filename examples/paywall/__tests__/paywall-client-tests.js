@@ -8,8 +8,7 @@
 
 const {indexBy, prop, assoc, dissoc, keys} = require('ramda')
 const {thread, threadP} = require('sprites/lib/fp.js')
-const Web3Eth = require('web3-eth')
-const {ZERO_ADDR, newIpcProvider} = require('sprites/lib/test-helpers.js')
+const {ZERO_ADDR, makeProvider} = require('sprites/lib/test-helpers.js')
 const OffChainRegistry = require('sprites/lib/off-chain-registry.js')
 const PaywallClient = require('../paywall-client.js')
 const Paywall = require('../paywall.js')
@@ -29,9 +28,7 @@ describe('PaywallClient', () => {
     const ArticleDB = indexBy(prop('id'), Articles)
 
     beforeAll(async () => {
-        // web3Provider = newIpcProvider()
-        web3Provider =
-            new Web3Eth.providers.HttpProvider('http://localhost:9545')
+        web3Provider = makeProvider()
         const spritesDeployment = await Sprites.testDeploy({web3Provider})
         ;({ALICE, BOB} = spritesDeployment.accounts)
         const spritesTemplate = dissoc('accounts', spritesDeployment)

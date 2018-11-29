@@ -32,5 +32,6 @@ mkShell rec {
     shellHook = ''
         export PATH="$PATH:$PWD/node_modules/.bin"
         export OVERMIND_CAN_DIE=keystore
+        # export TEST_CHAIN=ipc:$(realpath ./test-chain.ipc)
         '';
 }

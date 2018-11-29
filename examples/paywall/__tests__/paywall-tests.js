@@ -6,12 +6,11 @@
 // https://www.enuma.io/
 // ----------------------------------------------------------------------------
 
-const {newIpcProvider} = require('sprites/lib/test-helpers.js')
+const {makeProvider} = require('sprites/lib/test-helpers.js')
 const {
     map, assoc, assocPath, range, indexBy, prop, dissoc, pluck, inc, sum
 } = require('ramda')
 const {thread, threadP, update, updatePath} = require('sprites/lib/fp.js')
-const Web3Eth = require('web3-eth')
 const ChannelState = require('sprites/lib/channel-state.js')
 const Sprites = require('sprites')
 const OffChainRegistry = require('sprites/lib/off-chain-registry.js')
@@ -36,9 +35,7 @@ describe('Paywall', () => {
     const ArticleDB = indexBy(prop('id'), Articles)
 
     beforeAll(async () => {
-        // web3Provider = newIpcProvider()
-        web3Provider =
-            new Web3Eth.providers.HttpProvider('http://localhost:9545')
+        web3Provider = makeProvider()
         const spritesDeployment = await Sprites.testDeploy({web3Provider})
         ;({ALICE, BOB} = spritesDeployment.accounts)
         spritesTemplate = dissoc('accounts', spritesDeployment)
