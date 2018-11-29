@@ -30,6 +30,8 @@ Install the Node.js dependencies which are specific to this example
 application:
 
 ```
+nix-shell
+cd examples/paywall
 npm install
 ```
 
@@ -49,17 +51,13 @@ and a JSON file via the [lowdb](https://github.com/typicode/lowdb)
 abstraction layer, for demonstration purposes.
 
 It shares the test and dev chains and their accounts with other projects
-in this repo, so you have to start two `overmind` processes.
+in this repo, so we assume you have already started an `overmind`
+at the project root.
 
-One, as described in the main README:
 ```
-# at the project root
-overmind start
-```
-
-Then in a separate terminal:
-```
-cd examples/paywall
+# Make sure we are in a nix-shell
+echo $IN_NIX_SHELL   # => impure
+pwd    # => .../sprites/examples/paywall
 overmind start
 ```
 
