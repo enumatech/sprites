@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-//
+// paywall.js
 // Enuma Sprites PoC
 //
 // Copyright (c) 2018 Enuma Technologies Limited.
@@ -152,6 +152,7 @@ const Paywall = {
             prop('sprites'),
             ifChannelExists,
             Sprites.updateAndWithdraw,
+            Sprites.channelState,
             Sprites.save)
         return {...paywall, sprites}
     }),

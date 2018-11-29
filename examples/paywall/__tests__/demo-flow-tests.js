@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-// paywall-demo-tests.js
+// demo-flow-tests.js
 // Enuma Sprites PoC
 //
 // Copyright (c) 2018 Enuma Technologies Limited.

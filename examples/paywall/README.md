@@ -19,6 +19,10 @@ payment channel state at the time of purchase, signed by the publisher.
 The publisher does not have to store receipts, because they can trust
 a receipt if it carries their signature.
 
+The publishers still has to maintain the off-chain state of the channels
+they are involved in, so they can withdraw their funds and safely advance
+the channel state with the readers.
+
 
 
 ## Install
@@ -64,7 +68,6 @@ overmind start
 Once output of `overmind` has settled, open http://localhost:9966 in
 your browser and select the Alice account in your MetaMask.
 
-
 ### `publisher` process
 
 It deploys smart contracts with `npm run deploy` and starts a HTTP server
@@ -104,3 +107,45 @@ It starts a [beefy](http://didact.us/beefy/) webserver which bundles
 the web app with browserify, on-demand, whenever you reload the page.
 
 It is accessible via http://localhost:9966.
+
+
+
+## Usage
+
+We assume you switched to Alice in MetaMask and you are on the paywall
+web page.
+
+You can open a channel with the publisher, which will take 2 blockchain
+transactions. The 1st one is an approval to the sprites channel registry
+to take your tokens as a deposit and the 2nd one is opening a channel
+with the publisher and transferring a deposit within one combined
+transaction.
+
+If you look into the `sprites` local storage key, you should see the initial
+channel state there.
+
+The publisher doesn't know about this channel yet, because it's on-chain
+only at this moment, so their off-chain channel state in `paywall-db.json`
+is still empty.
+
+After opening a channel, the _Buy_ buttons become enabled, so we can
+buy them using an off-chain payment.
+
+Such a payment will open a MetaMask popup, where we can sign a channel
+state which combines crediting the publisher with the article price and
+allowing withdrawals both by the reader and the publisher in one step.
+
+At this point we should see the article contents and have a receipt in our
+local storage under the `library` key, the channel state under the `sprites`
+key and the publisher should see the same channel state in their
+`paywall-db.json`.
+
+Now the publisher can choose to withdraw their balance onto the blockchain.
+For this we provide a command-line utility:
+
+```
+node paywall-withdraw-all.js
+```
+
+After running that, we can switch to Bob in MetaMask and see their balance
+grow.

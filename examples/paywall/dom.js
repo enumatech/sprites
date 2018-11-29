@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-//
+// dom.js
 // Enuma Sprites PoC
 //
 // Copyright (c) 2018 Enuma Technologies Limited.

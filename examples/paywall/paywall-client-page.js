@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-//
+// paywall-client-page.js
 // Enuma Sprites PoC
 //
 // Copyright (c) 2018 Enuma Technologies Limited.
@@ -8,7 +8,7 @@
 
 const {isNil, map, omit, split} = require('ramda')
 const {keys} = require('ramda')
-const {thread, threadP} = require('sprites/lib/fp.js')
+const {log, thread, threadP} = require('sprites/lib/fp.js')
 const {NAMED_ACCOUNTS, ZERO_ADDR} = require('sprites/lib/test-helpers.js')
 const util = require('util')
 const {inspect} = util
