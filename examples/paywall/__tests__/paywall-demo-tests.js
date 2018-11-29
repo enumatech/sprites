@@ -6,12 +6,12 @@
 // https://www.enuma.io/
 // ----------------------------------------------------------------------------
 
-const {newIpcProvider} = require('../../../lib/test-helpers.js')
+const {newIpcProvider} = require('sprites/lib/test-helpers.js')
 const {__, indexBy, prop, assocPath, dissoc} = require('ramda')
-const {thread, threadP} = require('../../../lib/fp.js')
+const {thread, threadP} = require('sprites/lib/fp.js')
 const Web3Eth = require('web3-eth')
-const Sprites = require('../../../lib/sprites.js')
-const OffChainRegistry = require('../../../lib/off-chain-registry.js')
+const Sprites = require('sprites')
+const OffChainRegistry = require('sprites/lib/off-chain-registry.js')
 const Paywall = require('../paywall.js')
 const PaywallClient = require('../paywall-client.js')
 
