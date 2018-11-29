@@ -327,8 +327,8 @@ contract SpritesRegistry {
         right.credit = credits[1];
         right.withdrawal = withdrawals[1];
 
+        // TODO conversion? safe math?
         // prevent over withdrawals
-        // TODO conversion? save math?e
         assert(int(left.withdrawal) <= int(left.deposit) + left.credit);
 
         // FAIL!

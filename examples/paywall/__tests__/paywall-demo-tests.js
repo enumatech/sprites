@@ -7,7 +7,7 @@
 // ----------------------------------------------------------------------------
 
 const {makeProvider} = require('sprites/lib/test-helpers.js')
-const {__, indexBy, prop, assocPath, dissoc} = require('ramda')
+const {__, indexBy, prop, assocPath, dissoc, identity} = require('ramda')
 const {thread, threadP} = require('sprites/lib/fp.js')
 const Sprites = require('sprites')
 const OffChainRegistry = require('sprites/lib/off-chain-registry.js')
@@ -63,7 +63,7 @@ describe('Sprites paywall demo', () => {
 
     afterAll(() => web3Provider.connection.destroy())
 
-    describe('Getting the 1st article', function () {
+    describe('1st article', function () {
         let Reader, article
 
         beforeAll(async () => {
@@ -95,12 +95,39 @@ describe('Sprites paywall demo', () => {
             })
 
             it('is readable', async () => {
-                expect(paidArticle).toMatchObject(article)
+                expect(paidArticle)
+                    .toMatchObject({content: ArticleDB[article.id].content})
             })
 
-            it('is saved in our library', async () => {
+            it('is saved in the Reader\'s library', async () => {
                 const library = await PaywallClient.library(Reader)
                 expect(library).toMatchObject({[article.id]: receipt})
+            })
+
+            describe('when withdrawn by the Publisher', () => {
+                let initialBalance
+
+                beforeAll(async () => {
+                    ;({tokenBalance: initialBalance} =
+                        await Sprites.tokenBalance(Publisher.sprites))
+
+                    const chIds =
+                        Publisher.sprites.offChainReg.db
+                            .get('channels').map(identity).value()
+
+                    for (const {chId} of chIds) {
+                        await Paywall.withdraw(chId, Publisher)
+                    }
+                })
+
+                it('the payment is reflected on their on-chain balance',
+                    async () => {
+                        const {tokenBalance} =
+                            await Sprites.tokenBalance(Publisher.sprites)
+
+                        expect(tokenBalance)
+                            .toEqual(initialBalance + article.price)
+                    })
             })
         })
     })

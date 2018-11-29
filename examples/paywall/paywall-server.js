@@ -13,8 +13,7 @@ const express = require('express')
 const cors = require('cors')
 const errorhandler = require('errorhandler')
 const Jayson = require('sprites/lib/jayson.js')
-const Web3Eth = require('web3-eth')
-const {waitForAccounts} = require('sprites/lib/test-helpers.js')
+const {makeProvider, waitForAccounts} = require('sprites/lib/test-helpers.js')
 const low = require('lowdb')
 const LowFile = require('lowdb/adapters/FileAsync')
 const OffChainRegistry = require('sprites/lib/off-chain-registry.js')
@@ -24,7 +23,7 @@ const PaywallApi = require('./paywall-api.js')
 const LoremIpsum = require('lorem-ipsum')
 const serverPort = 3000
 const ethUrl = 'http://localhost:8545'
-const web3Provider = new Web3Eth.providers.HttpProvider(ethUrl)
+const web3Provider = makeProvider(ethUrl)
 const {accounts, ...spritesConfig} =
     Jayson.load(Path.join(__dirname, 'sprites-config.json'))
 

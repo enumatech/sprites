@@ -121,7 +121,7 @@ describe('Paywall', () => {
             it('describes the channel-state transition operation', () => {
                 expect(invoice).toMatchObject({
                     cmd: {
-                        name: 'credit',
+                        name: 'creditAndWithdraw',
                         params: [Sprites.ownIdx(PWinv.sprites), article.price]
                     }
                 })

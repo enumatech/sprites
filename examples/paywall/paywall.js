@@ -6,7 +6,9 @@
 // https://www.enuma.io/
 // ----------------------------------------------------------------------------
 
-const {curry, assoc, assocPath, project, values, prop} = require('ramda')
+const {
+    isNil, curry, assoc, assocPath, project, values, prop
+} = require('ramda')
 const {thread, threadP} = require('sprites/lib/fp.js')
 const assert = require('assert')
 const {inspect} = require('util')
@@ -145,7 +147,8 @@ const Paywall = {
         }
 
         const sprites = await threadP(
-            Paywall.channel(chId, paywall),
+            paywall,
+            Paywall.channel(chId),
             prop('sprites'),
             ifChannelExists,
             Sprites.updateAndWithdraw,
