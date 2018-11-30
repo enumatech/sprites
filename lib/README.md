@@ -21,3 +21,17 @@ An open payment channel has the following properties:
 * the sum of credits should be 0
 * withdrawals >= withdrawn
 * withdrawals <= deposits + credits
+
+deposits - withdraw is the channel capacity.
+credits represent the imbalance in this capacity.
+withdrawals schedules a slice off from this rebalanced capacity.
+
+
+balance = deposits - withdrawn + credits - withdrawals
+balance >= 0
+
+deposit(idx, amt)
+transfer(from, to, amt)
+reserve(amt1, amt2)
+withdraw(idx, amt)
+
