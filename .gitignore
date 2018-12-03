@@ -7,3 +7,4 @@ keystore
 keystore-*/
 dev-chain/
 test-chain.ipc
+coverage/

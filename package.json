@@ -12,7 +12,7 @@
   },
   "scripts": {
     "start": "echo Nothing to start. Refer the README for instructions or run the tests with `npm test`.",
-    "test": "jest --no-watchman"
+    "test": "jest --coverage"
   },
   "repository": {
     "type": "git",
