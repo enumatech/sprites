@@ -187,7 +187,8 @@ contract SpritesRegistry {
     function withdraw(uint chId) public onlyplayers(chId) {
         Player storage player = lookupPlayer(chId);
         uint toWithdraw = Math.sub(player.withdrawal, player.withdrawn);
-        require(ERC20Interface(channels[chId].tokenAddress).transfer(msg.sender, toWithdraw));
+        require(ERC20Interface(channels[chId].tokenAddress)
+            .transfer(msg.sender, toWithdraw));
         player.withdrawn = player.withdrawal;
     }
 
