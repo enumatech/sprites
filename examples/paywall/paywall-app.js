@@ -19,7 +19,7 @@ const demoCatalog = require('./demo-catalog.js')
 
 const ethUrl = 'http://localhost:8545'
 const web3Provider = makeProvider(ethUrl)
-let spritesConfigFile = Path.join(__dirname, 'sprites-config.json')
+const spritesConfigFile = Path.join(__dirname, 'sprites-config.json')
 const {accounts, ...spritesConfig} = Jayson.load(spritesConfigFile)
 const ownAddress = accounts.BOB
 
@@ -29,16 +29,16 @@ const PaywallApp = {
         const spritesDb = await low(new LowFile(spritesDbPath))
         return Paywall.make({
             db: demoCatalog,
-            sprites: thread({
+            sprites: thread(
+                Sprites.make({
                     ...spritesConfig,
                     web3Provider,
-                    ACTOR_NAME: 'Paywall Operator',
                     ownAddress,
                     offChainReg: new OffChainRegistry({
                         ownAddress,
                         db: spritesDb
                     })
-                },
+                }),
                 Sprites.withRemoteSigner,
                 Sprites.withWeb3Contracts),
         })
