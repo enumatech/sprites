@@ -49,14 +49,13 @@ describe('Paywall', () => {
         }
 
         PWC0 = PaywallClient.make({
-            sprites: thread({
-                    ...Sprites.new(),
+            sprites: Sprites.withRemoteSigner(
+                Sprites.make({
                     web3Provider,
                     ACTOR_NAME: 'Paywall Client',
                     ownAddress: ALICE,
                     offChainReg: new OffChainRegistry({ownAddress: ALICE})
-                },
-                Sprites.withRemoteSigner)
+                }))
         })
     })
 

@@ -49,14 +49,13 @@ describe('Sprites paywall demo', () => {
         Visitor = await PaywallClient.withPaywall(
             Paywall.config(Publisher),
             PaywallClient.make({
-                sprites: thread({
-                        ...Sprites.new(),
+                sprites: Sprites.withRemoteSigner(
+                    Sprites.make({
                         web3Provider,
                         ACTOR_NAME: 'Visitor',
                         ownAddress: ALICE,
                         offChainReg: new OffChainRegistry({ownAddress: ALICE})
-                    },
-                    Sprites.withRemoteSigner)
+                    }))
             }))
     })
 

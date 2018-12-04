@@ -230,8 +230,7 @@ async function start() {
         paywallConfig,
         PaywallClient.make({
             db: low(new LowStorage('library')),
-            sprites: {
-                ...Sprites.new(),
+            sprites: Sprites.make({
                 web3Provider,
                 ownAddress,
                 ACTOR_NAME: 'Paywall Client',
@@ -240,7 +239,7 @@ async function start() {
                     db: low(new LowStorage('sprites'))
                 }),
                 sign: Sign.personal(web3Provider, ownAddress)
-            }
+            })
         })
     )
     // await PaywallClient.validatePaywall(paywallConfig, pwc)

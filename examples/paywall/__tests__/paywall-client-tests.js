@@ -47,14 +47,14 @@ describe('PaywallClient', () => {
         }
 
         PWC0 = PaywallClient.make({
-            sprites: thread({
-                    ...Sprites.new(),
+            sprites: Sprites.withRemoteSigner(
+                Sprites.make({
                     web3Provider,
                     ACTOR_NAME: 'Paywall Client',
                     ownAddress: ALICE,
                     offChainReg: new OffChainRegistry({ownAddress: ALICE})
-                },
-                Sprites.withRemoteSigner)
+                })
+            )
         })
     })
 
@@ -74,7 +74,7 @@ describe('PaywallClient', () => {
 
         it('has a default sprites client', () => {
             expect(PaywallClient.make()).toMatchObject({
-                sprites: expect.objectContaining(Sprites.new())
+                sprites: expect.objectContaining(Sprites.make())
             })
         })
 

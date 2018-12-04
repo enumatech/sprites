@@ -6,8 +6,8 @@
 // https://www.enuma.io/
 // ----------------------------------------------------------------------------
 
-const {curry, map, assoc, assocPath, last, isNil, identity} = require('ramda')
-const {thread, threadP} = require('sprites/lib/fp.js')
+const {curry, assoc, assocPath, last, isNil, identity} = require('ramda')
+const {threadP} = require('sprites/lib/fp.js')
 const assert = require('assert')
 const {inspect} = require('util')
 const Web3Eth = require('web3-eth')
@@ -20,7 +20,7 @@ const PaywallClient = {
     make(opts={}) {
         return {
             db: low(new LowMem()),
-            sprites: Sprites.new(),
+            sprites: Sprites.make(),
             ...opts
         }
     },

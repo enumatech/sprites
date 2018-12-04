@@ -30,7 +30,7 @@ const Paywall = {
     new() {
         const paywall = {
             db: undefined,
-            sprites: Sprites.new()
+            sprites: Sprites.make()
         }
         return paywall
     },
