@@ -33,8 +33,7 @@ describe('PaywallClient', () => {
         ;({ALICE, BOB} = spritesDeployment.accounts)
         const spritesTemplate = dissoc('accounts', spritesDeployment)
 
-        PW = {
-            ...Paywall.new(),
+        PW = Paywall.make({
             db: ArticleDB,
             sprites: thread({
                     ...spritesTemplate,
@@ -44,7 +43,7 @@ describe('PaywallClient', () => {
                 },
                 Sprites.withRemoteSigner,
                 Sprites.withWeb3Contracts),
-        }
+        })
 
         PWC0 = PaywallClient.make({
             sprites: Sprites.withRemoteSigner(

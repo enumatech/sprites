@@ -17,6 +17,22 @@ const OffChainRegistry = require('sprites/lib/off-chain-registry.js')
 const Paywall = require('../paywall.js')
 const PaywallClient = require('../paywall-client.js')
 
+describe('Paywall.make', () => {
+    it('works without params', async () => {
+        expect(() => Paywall.make()).not.toThrow()
+    })
+
+    it('has a default sprites client', () => {
+        expect(Paywall.make()).toMatchObject({
+            sprites: expect.objectContaining(Sprites.make())
+        })
+    })
+
+    it('merges its options parameter into the returned client', () => {
+        expect(Paywall.make({param: 1})).toMatchObject({param: 1})
+    })
+})
+
 describe('Paywall', () => {
     let PW, PWC0, spritesTemplate, web3Provider
     const newArticle = (id) => new Object({
@@ -35,8 +51,7 @@ describe('Paywall', () => {
         ;({ALICE, BOB} = spritesDeployment.accounts)
         spritesTemplate = dissoc('accounts', spritesDeployment)
 
-        PW = {
-            ...Paywall.new(),
+        PW = Paywall.make({
             db: ArticleDB,
             sprites: thread({
                     ...spritesTemplate,
@@ -46,7 +61,7 @@ describe('Paywall', () => {
                 },
                 Sprites.withRemoteSigner,
                 Sprites.withWeb3Contracts),
-        }
+        })
 
         PWC0 = PaywallClient.make({
             sprites: Sprites.withRemoteSigner(

@@ -27,8 +27,7 @@ const PaywallApp = {
     async make() {
         const spritesDbPath = Path.join(__dirname, 'paywall-db.json')
         const spritesDb = await low(new LowFile(spritesDbPath))
-        return {
-            ...Paywall.new(),
+        return Paywall.make({
             db: demoCatalog,
             sprites: thread({
                     ...spritesConfig,
@@ -42,7 +41,7 @@ const PaywallApp = {
                 },
                 Sprites.withRemoteSigner,
                 Sprites.withWeb3Contracts),
-        }
+        })
     }
 }
 

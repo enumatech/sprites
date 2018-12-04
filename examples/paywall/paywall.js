@@ -27,12 +27,12 @@ const ChannelState = require('sprites/lib/channel-state.js')
 const Sprites = require('sprites')
 
 const Paywall = {
-    new() {
-        const paywall = {
+    make(opts) {
+        return {
             db: undefined,
-            sprites: Sprites.make()
+            sprites: Sprites.make(),
+            ...opts
         }
-        return paywall
     },
 
     /**

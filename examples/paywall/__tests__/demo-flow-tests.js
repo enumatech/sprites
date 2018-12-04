@@ -33,8 +33,7 @@ describe('Sprites paywall demo', () => {
         ;({ALICE, BOB} = spritesDeployment.accounts)
         const spritesTemplate = dissoc('accounts', spritesDeployment)
 
-        Publisher = {
-            ...Paywall.new(),
+        Publisher = Paywall.make({
             db: ArticleDB,
             sprites: thread({
                     ...spritesTemplate,
@@ -44,7 +43,7 @@ describe('Sprites paywall demo', () => {
                 },
                 Sprites.withRemoteSigner,
                 Sprites.withWeb3Contracts),
-        }
+        })
 
         Visitor = await PaywallClient.withPaywall(
             Paywall.config(Publisher),
