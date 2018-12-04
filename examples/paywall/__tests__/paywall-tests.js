@@ -48,8 +48,7 @@ describe('Paywall', () => {
                 Sprites.withWeb3Contracts),
         }
 
-        PWC0 = {
-            ...PaywallClient.new(),
+        PWC0 = PaywallClient.make({
             sprites: thread({
                     ...Sprites.new(),
                     web3Provider,
@@ -58,7 +57,7 @@ describe('Paywall', () => {
                     offChainReg: new OffChainRegistry({ownAddress: ALICE})
                 },
                 Sprites.withRemoteSigner)
-        }
+        })
     })
 
     afterAll(() => web3Provider.connection.destroy())

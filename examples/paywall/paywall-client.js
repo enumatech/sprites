@@ -17,10 +17,11 @@ const Sprites = require('sprites')
 const ChannelState = require('sprites/lib/channel-state.js')
 
 const PaywallClient = {
-    new() {
+    make(opts={}) {
         return {
             db: low(new LowMem()),
-            sprites: Sprites.new()
+            sprites: Sprites.new(),
+            ...opts
         }
     },
 

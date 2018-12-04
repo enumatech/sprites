@@ -226,10 +226,11 @@ async function start() {
 
     const paywallConfig = await paywall.config()
 
-    pwc = await threadP({
-            ...PaywallClient.new(),
+    pwc = await PaywallClient.withPaywall(
+        paywallConfig,
+        PaywallClient.make({
             db: low(new LowStorage('library')),
-            sprites: thread({
+            sprites: {
                 ...Sprites.new(),
                 web3Provider,
                 ownAddress,
@@ -239,9 +240,9 @@ async function start() {
                     db: low(new LowStorage('sprites'))
                 }),
                 sign: Sign.personal(web3Provider, ownAddress)
-            })
-        },
-        PaywallClient.withPaywall(paywallConfig))
+            }
+        })
+    )
     // await PaywallClient.validatePaywall(paywallConfig, pwc)
     console.info('Paywall client (pwc)', pwc)
 

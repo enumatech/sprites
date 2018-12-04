@@ -46,8 +46,7 @@ describe('PaywallClient', () => {
                 Sprites.withWeb3Contracts),
         }
 
-        PWC0 = {
-            ...PaywallClient.new(),
+        PWC0 = PaywallClient.make({
             sprites: thread({
                     ...Sprites.new(),
                     web3Provider,
@@ -56,10 +55,33 @@ describe('PaywallClient', () => {
                     offChainReg: new OffChainRegistry({ownAddress: ALICE})
                 },
                 Sprites.withRemoteSigner)
-        }
+        })
     })
 
     afterAll(() => web3Provider.connection.destroy())
+
+    describe('.make', () => {
+        it('works without params', () => {
+            expect(() => PaywallClient.make()).not.toThrow()
+        })
+
+        it('defaults to in-memory library db', () => {
+            expect(PaywallClient.make().db).toMatchObject({
+                read: expect.any(Function),
+                write: expect.any(Function)
+            })
+        })
+
+        it('has a default sprites client', () => {
+            expect(PaywallClient.make()).toMatchObject({
+                sprites: expect.objectContaining(Sprites.new())
+            })
+        })
+
+        it('merges its options parameter into the returned client', () => {
+            expect(PaywallClient.make({param: 1})).toMatchObject({param: 1})
+        })
+    })
 
     describe('.withPaywall', () => {
         it('works', async () => {
