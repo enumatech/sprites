@@ -41,6 +41,13 @@ function PaywallApi(paywall, router) {
         res.json(article)
     })
 
+    // Demo endpoints.
+    // They shouldn't exist in a real deployment without authorization!
+    router.postAsync('/publisher-withdraw', async ({body: chId}, res) => {
+        const ch = await Paywall.publisherWithdraw(chId, paywall)
+        res.json(ch)
+    })
+
     return router
 }
 

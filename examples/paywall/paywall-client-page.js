@@ -79,6 +79,10 @@ async function buyArticle(id) {
     return article
 }
 
+async function publisherWithdraw() {
+    await paywall.publisherWithdraw()
+}
+
 /**
  * Components
  * */
@@ -145,7 +149,9 @@ const Debug = ({pwc, library, route = {}}) => {
         h3('IDs of purchased articles'),
         pre(inspect(keys(library))),
         h3('Off-chain Sprites payment channel'),
-        pre(inspect(omit(boringChannelFields, channel)))
+        pre(inspect(omit(boringChannelFields, channel))),
+        button({onclick: () => publisherWithdraw()}, 'Publisher withdraw'),
+        button({onclick: () => readerWithdraw()}, 'Reader withdraw')
     )
 }
 

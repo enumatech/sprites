@@ -305,7 +305,7 @@ describe('Paywall', () => {
 
         describe.skip('.withdraw', () => {
             it('works', async () => {
-                await expect(Paywall.withdraw(chId, PW))
+                await expect(Paywall.publisherWithdraw(chId, PW))
                     .resolves.toMatch({x: "y"})
             })
         })

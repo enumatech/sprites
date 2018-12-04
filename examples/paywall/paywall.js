@@ -138,7 +138,7 @@ const Paywall = {
         return {...paywall, article}
     }),
 
-    withdraw: curry(async (chId, paywall) => {
+    publisherWithdraw: curry(async (chId, paywall) => {
         const ifChannelExists = (sprites) => {
             const {chId, channel} = sprites
             if (isNil(channel))

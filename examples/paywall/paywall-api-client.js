@@ -65,6 +65,9 @@ module.exports = (fetch) => {
         catalog: async () => api.get('/catalog'),
         invoice: async (order) => api.post('/invoice', order),
         processPayment: async (payment) => api.post('/payment', payment),
-        getArticle: async (receipt) => api.post('/article', receipt)
+        getArticle: async (receipt) => api.post('/article', receipt),
+        // Demo endpoints.
+        // They shouldn't exist in a real deployment without authorization!
+        publisherWithdraw: async (chId) => api.post('/publisher-withdraw', chId)
     }
 }

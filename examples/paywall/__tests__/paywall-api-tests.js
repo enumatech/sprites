@@ -91,4 +91,17 @@ describe('PaywallApi', () => {
             expect(Paywall.getArticle).toBeCalledWith(receipt, paywall)
         })
     })
+
+    describe('/publisher-withdraw', () => {
+        it('works', async () => {
+            const chId = 123
+            const ch = {mock: 'channel'}
+            mock(Paywall.publisherWithdraw, resolve(ch))
+
+            await expect(api.publisherWithdraw(chId))
+                .resolves.toMatchObject(ch)
+
+            expect(Paywall.publisherWithdraw).toBeCalledWith(chId, paywall)
+        })
+    })
 })

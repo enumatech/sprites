@@ -113,7 +113,7 @@ describe('Sprites paywall demo', () => {
                             .get('channels').map(identity).value()
 
                     for (const {chId} of chIds) {
-                        await Paywall.withdraw(chId, Publisher)
+                        await Paywall.publisherWithdraw(chId, Publisher)
                     }
                 })
 
