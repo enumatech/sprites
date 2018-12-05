@@ -235,14 +235,14 @@ async function start() {
     pwc = await PaywallClient.withPaywall(
         paywallConfig,
         PaywallClient.make({
-            db: low(new LowStorage('library')),
+            db: low(new LowStorage(`library-${paywallConfig.reg}`)),
             sprites: Sprites.make({
                 web3Provider,
                 ownAddress,
                 ACTOR_NAME: 'Paywall Client',
                 offChainReg: new OffChainRegistry({
                     ownAddress,
-                    db: low(new LowStorage('sprites'))
+                    db: low(new LowStorage(`sprites-${paywallConfig.reg}`))
                 }),
                 sign: Sign.personal(web3Provider, ownAddress)
             })

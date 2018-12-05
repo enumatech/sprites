@@ -8,6 +8,7 @@
 
 const {thread} = require('sprites/lib/fp.js')
 const Path = require('path')
+const Fs = require('fs')
 const Jayson = require('sprites/lib/jayson.js')
 const {makeProvider} = require('sprites/lib/test-helpers.js')
 const low = require('lowdb')
@@ -23,10 +24,36 @@ const spritesConfigFile = Path.join(__dirname, 'sprites-config.json')
 const {accounts, ...spritesConfig} = Jayson.load(spritesConfigFile)
 const ownAddress = accounts.BOB
 
+const ErrorFileExists = (path) =>
+    new Error(`mkdir: cannot create directory '${path}': File exists`)
+
+const ensureDirExists = (dir) => {
+    if (Fs.existsSync(dir)) {
+        if (!Fs.statSync(dir).isDirectory())
+            throw ErrorFileExists(dir)
+    } else {
+        Fs.mkdirSync(dir)
+    }
+}
+
+const offChainRegInit = (dbDir, onChainRegAddr) => {
+    // Off-chain registry DB is named after the on-chain registry's address
+    const dir = Path.join(__dirname, dbDir)
+    const file = onChainRegAddr + '.json'
+    // Convenience `latest.json` symlink to the latest db to aid debugging
+    const latest = Path.join(dir, 'latest.json')
+
+    ensureDirExists(dir)
+    if (Fs.existsSync(latest)) Fs.unlinkSync(latest)
+    Fs.symlinkSync(file, latest)
+    return Path.join(dir, file)
+}
+
+const offChainRegPath = offChainRegInit('off-chain-reg', spritesConfig.reg)
+
 const PaywallApp = {
     async make() {
-        const spritesDbPath = Path.join(__dirname, 'paywall-db.json')
-        const spritesDb = await low(new LowFile(spritesDbPath))
+        const spritesDb = await low(new LowFile(offChainRegPath))
         return Paywall.make({
             db: demoCatalog,
             sprites: thread(
