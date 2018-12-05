@@ -7,7 +7,7 @@
 // ----------------------------------------------------------------------------
 
 const {isNil, map, omit, split} = require('ramda')
-const {keys} = require('ramda')
+const {keys, assocPath} = require('ramda')
 const {log, thread, threadP} = require('sprites/lib/fp.js')
 const {NAMED_ACCOUNTS, ZERO_ADDR} = require('sprites/lib/test-helpers.js')
 const util = require('util')
@@ -80,7 +80,9 @@ async function buyArticle(id) {
 }
 
 async function publisherWithdraw() {
-    await paywall.publisherWithdraw()
+    const ch = await paywall.publisherWithdraw(pwc.sprites.chId)
+    pwc = assocPath(['sprites', 'channel'], ch, pwc)
+    render()
 }
 
 /**
@@ -151,7 +153,8 @@ const Debug = ({pwc, library, route = {}}) => {
         h3('Off-chain Sprites payment channel'),
         pre(inspect(omit(boringChannelFields, channel))),
         button({onclick: () => publisherWithdraw()}, 'Publisher withdraw'),
-        button({onclick: () => readerWithdraw()}, 'Reader withdraw')
+        button({onclick: () => readerWithdraw(), disabled: true},
+            'Reader withdraw')
     )
 }
 

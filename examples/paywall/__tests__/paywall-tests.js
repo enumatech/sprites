@@ -262,7 +262,8 @@ describe('Paywall', () => {
 
         describe('.getArticle', () => {
             // FIXME article index should be automatically incremented
-            const article = Articles[1]
+            const article1 = Articles[1]
+            const article2 = Articles[2]
             let receipt
 
             async function buy(articleId) {
@@ -274,7 +275,7 @@ describe('Paywall', () => {
             }
 
             beforeAll(async () => {
-                ;({receipt} = await buy(article.id))
+                ;({receipt} = await buy(article1.id))
             })
 
             it('requires a valid signature', async () => {
@@ -288,25 +289,42 @@ describe('Paywall', () => {
 
             it('returns the article', async () => {
                 await expect(Paywall.getArticle(receipt, PW))
-                    .resolves.toMatchObject({article})
+                    .resolves.toMatchObject({article: article1})
             })
 
             describe('after buying another article', () => {
                 beforeAll(async () => {
-                    await buy(Articles[2].id)
+                    await buy(article2.id)
                 })
 
-                it('still returns the article', async () => {
+                it('still returns the first article', async () => {
                     await expect(Paywall.getArticle(receipt, PW))
-                        .resolves.toMatchObject({article})
+                        .resolves.toMatchObject({article: article1})
                 })
-            })
-        })
 
-        describe.skip('.withdraw', () => {
-            it('works', async () => {
-                await expect(Paywall.publisherWithdraw(chId, PW))
-                    .resolves.toMatch({x: "y"})
+                describe('.publisherWithdraw', () => {
+                    it('withdraws all payments', async () => {
+                        const {sprites} = await Paywall.channel(chId, PW)
+                        const ownIdx = Sprites.ownIdx(sprites)
+                        const {channel: {withdrawals, withdrawn}} = sprites
+                        const expectToWithdraw =
+                            withdrawals[ownIdx] - withdrawn[ownIdx]
+                        // Ensure we have something to withdraw
+                        expect(expectToWithdraw).toBeGreaterThan(0)
+                        const {tokenBalance: balanceBefore} =
+                            await Sprites.tokenBalance(sprites)
+
+                        await expect(Paywall.publisherWithdraw(chId, PW))
+                            .resolves.toMatchObject({
+                                withdrawn: expectToWithdraw
+                            })
+
+                        const {tokenBalance: balanceAfter} =
+                            await Sprites.tokenBalance(sprites)
+
+                        expect(balanceAfter - balanceBefore).toEqual(expectToWithdraw)
+                    })
+                })
             })
         })
 

@@ -9,6 +9,7 @@
 const bodyParser = require('body-parser')
 const {decorateApp} = require('@awaitjs/express')
 const Paywall = require('./paywall.js')
+const Jayson = require('sprites/lib/jayson')
 
 /**
  * Returns the `router` object with API routes defined on it,
@@ -16,6 +17,7 @@ const Paywall = require('./paywall.js')
  * */
 function PaywallApi(paywall, router) {
     router = decorateApp(router)
+    JSON.parse = Jayson.parse('Smart JSON parser')
     router.use(bodyParser.json())
 
     router.getAsync('/config', async (req, res) => {
@@ -43,9 +45,11 @@ function PaywallApi(paywall, router) {
 
     // Demo endpoints.
     // They shouldn't exist in a real deployment without authorization!
-    router.postAsync('/publisher-withdraw', async ({body: chId}, res) => {
-        const ch = await Paywall.publisherWithdraw(chId, paywall)
-        res.json(ch)
+    router.postAsync('/publisher-withdraw', async ({body: {chId}}, res) => {
+        // chId is wrapped into an object because `bodyParser.json()`  throws
+        // when it encounters a naked number.
+        const {withdrawn} = await Paywall.publisherWithdraw(chId, paywall)
+        res.json({withdrawn})
     })
 
     return router

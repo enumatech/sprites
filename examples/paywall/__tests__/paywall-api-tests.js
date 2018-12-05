@@ -95,11 +95,11 @@ describe('PaywallApi', () => {
     describe('/publisher-withdraw', () => {
         it('works', async () => {
             const chId = 123
-            const ch = {mock: 'channel'}
-            mock(Paywall.publisherWithdraw, resolve(ch))
+            const withdrawn = {withdrawn: 456}
+            mock(Paywall.publisherWithdraw, resolve(withdrawn))
 
             await expect(api.publisherWithdraw(chId))
-                .resolves.toMatchObject(ch)
+                .resolves.toMatchObject(withdrawn)
 
             expect(Paywall.publisherWithdraw).toBeCalledWith(chId, paywall)
         })

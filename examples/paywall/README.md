@@ -125,8 +125,14 @@ If you look into the `sprites` local storage key, you should see the initial
 channel state there.
 
 The publisher doesn't know about this channel yet, because it's on-chain
-only at this moment, so their off-chain channel state in `paywall-db.json`
-is still empty.
+only at this moment, so their off-chain channel state in is still empty.
+
+The off-chain channel state is stored in a plain JSON file under an
+`off-chain-reg/<on-chain registry contract address>.json`, so a new file
+is created when a new registry contract is deployed to the dev chain.
+For the sake of convenience, the currently used off-chain registry file
+is always accessible via the `off-chain-reg/latest.json` symlink, after
+starting the `publisher` process.
 
 After opening a channel, the _Buy_ buttons become enabled, so we can
 buy them using an off-chain payment.
@@ -138,7 +144,7 @@ allowing withdrawals both by the reader and the publisher in one step.
 At this point we should see the article contents and have a receipt in our
 local storage under the `library` key, the channel state under the `sprites`
 key and the publisher should see the same channel state in their
-`paywall-db.json`.
+`off-chain-reg/latest.json`.
 
 Now the publisher can choose to withdraw their balance onto the blockchain.
 For this we provide a command-line utility:

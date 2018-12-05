@@ -139,22 +139,22 @@ const Paywall = {
     }),
 
     publisherWithdraw: curry(async (chId, paywall) => {
-        const ifChannelExists = (sprites) => {
-            const {chId, channel} = sprites
-            if (isNil(channel))
-                throw new Error(`No channel found for chId "${chId}"`)
-            return sprites
-        }
-
-        const sprites = await threadP(
+        const spritesBefore = await threadP(
             paywall,
             Paywall.channel(chId),
-            prop('sprites'),
-            ifChannelExists,
+            prop('sprites'))
+
+        const spritesAfter = await threadP(
+            spritesBefore,
             Sprites.updateAndWithdraw,
             Sprites.channelState,
             Sprites.save)
-        return {...paywall, sprites}
+
+        const ownIdx = Sprites.ownIdx(spritesAfter)
+        const withdrawn =
+            spritesAfter.channel.withdrawn[ownIdx] -
+            spritesBefore.channel.withdrawn[ownIdx]
+        return {...paywall, sprites: spritesAfter, withdrawn}
     }),
 
     channel: curry(async (chId, paywall) => {

@@ -22,8 +22,9 @@ async function start() {
 
     for (const {chId} of chIds) {
         log(`Withdrawing from channel ${chId}`)
-        const ch = await Paywall.publisherWithdraw(chId, paywall)
-        log(ch.sprites.channel)
+        const {withdrawn, sprites: {channel}} =
+            await Paywall.publisherWithdraw(chId, paywall)
+        log(`Withdrawn ${withdrawn} tokens. New channel state:\n`, channel)
     }
 }
 

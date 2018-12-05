@@ -58,16 +58,16 @@ function makeApiFetch(fetch) {
 }
 
 module.exports = (fetch) => {
-    const api = makeApiFetch(fetch)
+    const http = makeApiFetch(fetch)
 
     return {
-        config: async () => api.get('/config'),
-        catalog: async () => api.get('/catalog'),
-        invoice: async (order) => api.post('/invoice', order),
-        processPayment: async (payment) => api.post('/payment', payment),
-        getArticle: async (receipt) => api.post('/article', receipt),
+        config: async () => http.get('/config'),
+        catalog: async () => http.get('/catalog'),
+        invoice: async (order) => http.post('/invoice', order),
+        processPayment: async (payment) => http.post('/payment', payment),
+        getArticle: async (receipt) => http.post('/article', receipt),
         // Demo endpoints.
         // They shouldn't exist in a real deployment without authorization!
-        publisherWithdraw: async (chId) => api.post('/publisher-withdraw', chId)
+        publisherWithdraw: async (chId) => http.post('/publisher-withdraw', {chId})
     }
 }
