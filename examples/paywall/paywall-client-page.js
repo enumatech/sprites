@@ -80,8 +80,10 @@ async function buyArticle(id) {
 }
 
 async function publisherWithdraw() {
-    const ch = await paywall.publisherWithdraw(pwc.sprites.chId)
-    pwc = assocPath(['sprites', 'channel'], ch, pwc)
+    const chId = pwc.sprites.chId
+    const {withdrawn} = await paywall.publisherWithdraw(chId)
+    console.log('withdrawn', withdrawn)
+    pwc = await PaywallClient.channel(chId, pwc)
     render()
 }
 
