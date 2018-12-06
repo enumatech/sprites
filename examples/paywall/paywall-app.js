@@ -15,7 +15,7 @@ const low = require('lowdb')
 const LowFile = require('lowdb/adapters/FileAsync')
 const OffChainRegistry = require('sprites/lib/off-chain-registry.js')
 const Sprites = require('sprites')
-const Paywall = require('./paywall.js')
+const Publisher = require('./publisher.js')
 const demoCatalog = require('./demo-catalog.js')
 
 const ethUrl = 'http://localhost:8545'
@@ -54,7 +54,7 @@ const offChainRegPath = offChainRegInit('off-chain-reg', spritesConfig.reg)
 const PaywallApp = {
     async make() {
         const spritesDb = await low(new LowFile(offChainRegPath))
-        return Paywall.make({
+        return Publisher.make({
             db: demoCatalog,
             sprites: thread(
                 Sprites.make({

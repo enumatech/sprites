@@ -47,8 +47,7 @@ _Publisher_ role.
 ## Start
 
 This example has its own background processes, to provide HTTP servers
-for an auto-bundling web app seen by Readers and a Paywall API for
-the Publisher.
+for an auto-bundling web app seen by Readers and an API for the Publisher.
 
 There are no database servers; we simply use the browser local storage
 and a JSON file via the [lowdb](https://github.com/typicode/lowdb)
@@ -71,7 +70,7 @@ your browser and select the Alice account in your MetaMask.
 ### `publisher` process
 
 It deploys smart contracts with `npm run deploy` and starts a HTTP server
-with `npm run publisher`, exposing the Paywall API on http://localhost:3000.
+with `npm run publisher`, exposing the Publisher API on http://localhost:3000.
 
 The addresses of the deployed contracts are saved into the
 `./sprites-config.json` file.

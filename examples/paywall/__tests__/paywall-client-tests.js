@@ -11,12 +11,12 @@ const {thread, threadP} = require('sprites/lib/fp.js')
 const {ZERO_ADDR, makeProvider} = require('sprites/lib/test-helpers.js')
 const OffChainRegistry = require('sprites/lib/off-chain-registry.js')
 const PaywallClient = require('../paywall-client.js')
-const Paywall = require('../paywall.js')
+const Publisher = require('../publisher.js')
 const Sprites = require('sprites')
 const ChannelState = require('sprites/lib/channel-state.js')
 
 describe('PaywallClient', () => {
-    let PW, PWC0, web3Provider
+    let publisher, PWC0, web3Provider
     const Articles = [
         {
             id: "aId-1",
@@ -33,11 +33,11 @@ describe('PaywallClient', () => {
         ;({ALICE, BOB} = spritesDeployment.accounts)
         const spritesTemplate = dissoc('accounts', spritesDeployment)
 
-        PW = Paywall.make({
+        publisher = Publisher.make({
             db: ArticleDB,
             sprites: thread({
                     ...spritesTemplate,
-                    ACTOR_NAME: 'Paywall Operator',
+                    ACTOR_NAME: 'Publisher',
                     ownAddress: BOB,
                     offChainReg: new OffChainRegistry({ownAddress: BOB})
                 },
@@ -84,9 +84,11 @@ describe('PaywallClient', () => {
 
     describe('.withPaywall', () => {
         it('works', async () => {
-            const paywallConfig = Paywall.config(PW)
-            const client = await PaywallClient.withPaywall(paywallConfig, PWC0)
-            const {publisher, sprites: {preimageManager, reg, token}} = client
+            const paywallConfig = Publisher.config(publisher)
+            const {
+                publisher: publisherAddr,
+                sprites: {preimageManager, reg, token}
+            } = await PaywallClient.withPaywall(paywallConfig, PWC0)
 
             /**
              * Expect a web3.Contract object at the given address with
@@ -98,7 +100,7 @@ describe('PaywallClient', () => {
                 expect(contract[methodName]).toBeInstanceOf(Function)
             }
 
-            expect(publisher).toEqual(paywallConfig.publisher)
+            expect(publisherAddr).toEqual(paywallConfig.publisher)
             expectContract(preimageManager,
                 paywallConfig.preimageManager, 'submitPreimage')
             expectContract(reg, paywallConfig.reg, 'create')
@@ -108,7 +110,7 @@ describe('PaywallClient', () => {
 
     describe('.validatePaywall', () => {
         it('works', async () => {
-            const paywallConfig = Paywall.config(PW)
+            const paywallConfig = Publisher.config(publisher)
 
             await expect(PaywallClient.validatePaywall(paywallConfig, PWC0))
                 .resolves.toHaveLength(3)
@@ -137,7 +139,7 @@ describe('PaywallClient', () => {
         let paywallConfig, connectedClient
 
         beforeAll(async () => {
-            paywallConfig = Paywall.config(PW)
+            paywallConfig = Publisher.config(publisher)
             connectedClient = await PaywallClient.withPaywall(paywallConfig, PWC0)
         })
 
@@ -145,7 +147,7 @@ describe('PaywallClient', () => {
             let PWC, chId, article, articleId
 
             beforeAll(async () => {
-                const catalog = await Paywall.catalog(PW)
+                const catalog = await Publisher.catalog(publisher)
                 article = catalog[0]
                 articleId = article.id
                 PWC = await threadP(connectedClient,
@@ -201,7 +203,7 @@ describe('PaywallClient', () => {
 
                 beforeAll(async () => {
                     const {order} = PaywallClient.order(articleId, PWC)
-                    ;({invoice} = await Paywall.invoice(order, PW))
+                    ;({invoice} = await Publisher.invoice(order, publisher))
                     PWCpmt = await PaywallClient.pay(invoice, PWC)
                     ;({payment} = PWCpmt)
                 })
@@ -231,10 +233,12 @@ describe('PaywallClient', () => {
 
                 beforeAll(async () => {
                     const {order} = PaywallClient.order(articleId, PWC)
-                    const {invoice} = await Paywall.invoice(order, PW)
+                    const {invoice} = await Publisher.invoice(order, publisher)
                     const {payment} = await PaywallClient.pay(invoice, PWC)
-                    ;({paymentReceipt} = await Paywall.processPayment(payment, PW))
-                    ;({receipt} = await PaywallClient.processReceipt(paymentReceipt, PWC))
+                    ;({paymentReceipt} =
+                        await Publisher.processPayment(payment, publisher))
+                    ;({receipt} =
+                        await PaywallClient.processReceipt(paymentReceipt, PWC))
                 })
 
                 it('saves the channel state', async () => {

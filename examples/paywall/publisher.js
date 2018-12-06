@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-// paywall.js
+// publisher.js
 // Enuma Sprites PoC
 //
 // Copyright (c) 2018 Enuma Technologies Limited.
@@ -26,7 +26,7 @@ const Sign = require('sprites/lib/sign.js')
 const ChannelState = require('sprites/lib/channel-state.js')
 const Sprites = require('sprites')
 
-const Paywall = {
+const Publisher = {
     make(opts) {
         return {
             db: undefined,
@@ -37,7 +37,7 @@ const Paywall = {
 
     /**
      * Returns parameters necessary for a PaywallClient to establish
-     * payment channels with the Paywall
+     * payment channels with the Publisher
      * */
     config(paywall) {
         const {sprites: {ownAddress, preimageManager, reg, token}} = paywall
@@ -88,7 +88,7 @@ const Paywall = {
         const {sprites} = paywall
         const sig = await thread(
             unsignedReceipt,
-            Paywall.receiptData,
+            Publisher.receiptData,
             bufferToHex,
             addHexPrefix,
             paywall.sprites.sign)
@@ -122,7 +122,7 @@ const Paywall = {
             + 'in channel:\n'
             + inspect(sprites.channel))
 
-        const sig = await Paywall.receiptSig({articleId, chId}, paywall)
+        const sig = await Publisher.receiptSig({articleId, chId}, paywall)
 
         await Sprites.save(sprites)
         return {...paywall, sprites, paymentReceipt: {articleId, chId, sig, payment}}
@@ -130,7 +130,7 @@ const Paywall = {
 
     getArticle: curry(async (receipt, paywall) => {
         const {sig, articleId} = receipt
-        const receiptHash = hashPersonalMessage(Paywall.receiptData(receipt))
+        const receiptHash = hashPersonalMessage(Publisher.receiptData(receipt))
         const {sprites} = paywall
         assert(Sign.by(sprites.ownAddress, receiptHash, sig),
             `Invalid signture on receipt:\n` + inspect(receipt))
@@ -141,7 +141,7 @@ const Paywall = {
     publisherWithdraw: curry(async (chId, paywall) => {
         const spritesBefore = await threadP(
             paywall,
-            Paywall.channel(chId),
+            Publisher.channel(chId),
             prop('sprites'))
 
         const spritesAfter = await threadP(
@@ -172,9 +172,9 @@ const Paywall = {
      * It's meant to be a testing convenience, hence not chainable.
      * */
     balance: curry(async (chId, paywall) => {
-        const {sprites} = await Paywall.channel(chId, paywall)
+        const {sprites} = await Publisher.channel(chId, paywall)
         return ChannelState.balance(Sprites.ownIdx(sprites), sprites.channel)
     })
 }
 
-module.exports = Paywall
+module.exports = Publisher

@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-// paywall-tests.js
+// publisher-tests.js
 // Enuma Sprites PoC
 //
 // Copyright (c) 2018 Enuma Technologies Limited.
@@ -8,33 +8,33 @@
 
 const {makeProvider} = require('sprites/lib/test-helpers.js')
 const {
-    map, assoc, assocPath, range, indexBy, prop, dissoc, pluck, inc, sum
+    map, assoc, assocPath, range, indexBy, prop, pluck, inc, sum
 } = require('ramda')
 const {thread, threadP, update, updatePath} = require('sprites/lib/fp.js')
 const ChannelState = require('sprites/lib/channel-state.js')
 const Sprites = require('sprites')
 const OffChainRegistry = require('sprites/lib/off-chain-registry.js')
-const Paywall = require('../paywall.js')
+const Publisher = require('../publisher.js')
 const PaywallClient = require('../paywall-client.js')
 
-describe('Paywall.make', () => {
+describe('Publisher.make', () => {
     it('works without params', async () => {
-        expect(() => Paywall.make()).not.toThrow()
+        expect(() => Publisher.make()).not.toThrow()
     })
 
     it('has a default sprites client', () => {
-        expect(Paywall.make()).toMatchObject({
+        expect(Publisher.make()).toMatchObject({
             sprites: expect.objectContaining(Sprites.make())
         })
     })
 
     it('merges its options parameter into the returned client', () => {
-        expect(Paywall.make({param: 1})).toMatchObject({param: 1})
+        expect(Publisher.make({param: 1})).toMatchObject({param: 1})
     })
 })
 
-describe('Paywall', () => {
-    let PW, PWC0, spritesTemplate, web3Provider
+describe('Publisher', () => {
+    let publisher, PWC0, web3Provider
     const newArticle = (id) => new Object({
         id: `aId-${id}`,
         price: 10 + id,
@@ -45,17 +45,17 @@ describe('Paywall', () => {
     const Articles = map(newArticle, range(0, 2 + 1))
     const ArticleDB = indexBy(prop('id'), Articles)
 
-    beforeAll(async () => {
-        web3Provider = makeProvider()
-        const spritesDeployment = await Sprites.testDeploy({web3Provider})
-        ;({ALICE, BOB} = spritesDeployment.accounts)
-        spritesTemplate = dissoc('accounts', spritesDeployment)
+    beforeAll(() => web3Provider = makeProvider())
 
-        PW = Paywall.make({
+    beforeAll(async () => {
+        const {accounts: {ALICE, BOB}, ...spritesTemplate} =
+            await Sprites.testDeploy({web3Provider})
+
+        publisher = Publisher.make({
             db: ArticleDB,
             sprites: thread({
                     ...spritesTemplate,
-                    ACTOR_NAME: 'Paywall Operator',
+                    ACTOR_NAME: 'Publisher',
                     ownAddress: BOB,
                     offChainReg: new OffChainRegistry({ownAddress: BOB})
                 },
@@ -78,10 +78,11 @@ describe('Paywall', () => {
 
     describe('.config', () => {
         it('works', async () => {
-            const addr = (contract) => PW.sprites[contract].options.address
+            const addr = (contract) =>
+                publisher.sprites[contract].options.address
 
-            expect(Paywall.config(PW)).toMatchObject({
-                publisher: PW.sprites.ownAddress,
+            expect(Publisher.config(publisher)).toMatchObject({
+                publisher: publisher.sprites.ownAddress,
                 preimageManager: addr('preimageManager'),
                 reg: addr('reg'),
                 token: addr('token')
@@ -93,7 +94,7 @@ describe('Paywall', () => {
         let catalog
 
         beforeAll(async () => {
-            catalog = await Paywall.catalog(PW)
+            catalog = await Publisher.catalog(publisher)
         })
 
         it('does not contain the article contents', async () => {
@@ -111,7 +112,7 @@ describe('Paywall', () => {
         beforeAll(async () => {
             const priceOfAllArticles = thread(Articles, pluck('price'), sum)
             PWC = await threadP(PWC0,
-                PaywallClient.withPaywall(Paywall.config(PW)),
+                PaywallClient.withPaywall(Publisher.config(publisher)),
                 PaywallClient.approve(priceOfAllArticles),
                 PaywallClient.firstDeposit(priceOfAllArticles),
                 PaywallClient.order(articleId))
@@ -123,7 +124,7 @@ describe('Paywall', () => {
             let invoice // the invoice itself for convenience
 
             beforeAll(async () => {
-                PWinv = await Paywall.invoice(order, PW)
+                PWinv = await Publisher.invoice(order, publisher)
                 ;({invoice} = PWinv)
             })
 
@@ -168,8 +169,8 @@ describe('Paywall', () => {
             let invoice, balanceBeforePayment
 
             beforeAll(async () => {
-                balanceBeforePayment = await Paywall.balance(chId, PW)
-                ;({invoice} = await Paywall.invoice(order, PW))
+                balanceBeforePayment = await Publisher.balance(chId, publisher)
+                ;({invoice} = await Publisher.invoice(order, publisher))
             })
 
             describe('without a signature', () => {
@@ -182,12 +183,12 @@ describe('Paywall', () => {
                 })
 
                 it('is rejected', async () => {
-                    await expect(Paywall.processPayment(payment, PW))
+                    await expect(Publisher.processPayment(payment, publisher))
                         .rejects.toThrowError(/missing/i)
                 })
 
                 it('retains the channel balance', async () => {
-                    await expect(Paywall.balance(chId, PW))
+                    await expect(Publisher.balance(chId, publisher))
                         .resolves.toEqual(balanceBeforePayment)
                 })
             })
@@ -203,12 +204,12 @@ describe('Paywall', () => {
                 })
 
                 it('is rejected', async () => {
-                    await expect(Paywall.processPayment(payment, PW))
+                    await expect(Publisher.processPayment(payment, publisher))
                         .rejects.toThrowError(/invalid/i)
                 })
 
                 it('retains the channel balance', async () => {
-                    await expect(Paywall.balance(chId, PW))
+                    await expect(Publisher.balance(chId, publisher))
                         .resolves.toEqual(balanceBeforePayment)
                 })
             })
@@ -221,10 +222,11 @@ describe('Paywall', () => {
                 let startRound, receipt, payment
 
                 beforeAll(async () => {
-                    const pw0 = await Paywall.channel(chId, PW)
+                    const pw0 = await Publisher.channel(chId, publisher)
                     startRound = pw0.sprites.channel.round
                     ;({payment} = await PaywallClient.pay(invoice, PWC))
-                    ;({paymentReceipt: receipt} = await Paywall.processPayment(payment, PW))
+                    ;({paymentReceipt: receipt} =
+                        await Publisher.processPayment(payment, publisher))
                     await PaywallClient.processReceipt(receipt, PWC)
                 })
 
@@ -244,12 +246,12 @@ describe('Paywall', () => {
                 })
 
                 it('increases the channel balance', async () => {
-                    await expect(Paywall.balance(chId, PW))
+                    await expect(Publisher.balance(chId, publisher))
                         .resolves.toEqual(balanceBeforePayment + article.price)
                 })
 
                 it('saves the channel state', async () => {
-                    const {sprites} = await Paywall.channel(chId, PW)
+                    const {sprites} = await Publisher.channel(chId, publisher)
 
                     expect(sprites.channel)
                         .toHaveProperty('round', startRound + 1)
@@ -268,9 +270,9 @@ describe('Paywall', () => {
 
             async function buy(articleId) {
                 const {order} = await PaywallClient.order(articleId, PWC)
-                const {invoice} = await Paywall.invoice(order, PW)
+                const {invoice} = await Publisher.invoice(order, publisher)
                 const {payment} = await PaywallClient.pay(invoice, PWC)
-                const {paymentReceipt} = await Paywall.processPayment(payment, PW)
+                const {paymentReceipt} = await Publisher.processPayment(payment, publisher)
                 return await PaywallClient.processReceipt(paymentReceipt, PWC)
             }
 
@@ -280,15 +282,16 @@ describe('Paywall', () => {
 
             it('requires a valid signature', async () => {
                 const otherReceipt = update('chId', inc, receipt)
-                const otherSig = await Paywall.receiptSig(otherReceipt, PW)
+                const otherSig =
+                    await Publisher.receiptSig(otherReceipt, publisher)
                 const invalidReceipt = assoc('sig', otherSig, receipt)
 
-                await expect(Paywall.getArticle(invalidReceipt, PW))
+                await expect(Publisher.getArticle(invalidReceipt, publisher))
                     .rejects.toThrowError(/Invalid signture/i)
             })
 
             it('returns the article', async () => {
-                await expect(Paywall.getArticle(receipt, PW))
+                await expect(Publisher.getArticle(receipt, publisher))
                     .resolves.toMatchObject({article: article1})
             })
 
@@ -298,13 +301,13 @@ describe('Paywall', () => {
                 })
 
                 it('still returns the first article', async () => {
-                    await expect(Paywall.getArticle(receipt, PW))
+                    await expect(Publisher.getArticle(receipt, publisher))
                         .resolves.toMatchObject({article: article1})
                 })
 
                 describe('.publisherWithdraw', () => {
                     it('withdraws all payments', async () => {
-                        const {sprites} = await Paywall.channel(chId, PW)
+                        const {sprites} = await Publisher.channel(chId, publisher)
                         const ownIdx = Sprites.ownIdx(sprites)
                         const {channel: {withdrawals, withdrawn}} = sprites
                         const expectToWithdraw =
@@ -314,7 +317,7 @@ describe('Paywall', () => {
                         const {tokenBalance: balanceBefore} =
                             await Sprites.tokenBalance(sprites)
 
-                        await expect(Paywall.publisherWithdraw(chId, PW))
+                        await expect(Publisher.publisherWithdraw(chId, publisher))
                             .resolves.toMatchObject({
                                 withdrawn: expectToWithdraw
                             })
@@ -322,7 +325,8 @@ describe('Paywall', () => {
                         const {tokenBalance: balanceAfter} =
                             await Sprites.tokenBalance(sprites)
 
-                        expect(balanceAfter - balanceBefore).toEqual(expectToWithdraw)
+                        expect(balanceAfter - balanceBefore)
+                            .toEqual(expectToWithdraw)
                     })
                 })
             })
@@ -330,7 +334,7 @@ describe('Paywall', () => {
 
         describe.skip('.channel', () => {
             it('works', async () => {
-                const {sprites} = await Paywall.channel(chId, PW)
+                const {sprites} = await Publisher.channel(chId, publisher)
                 const {channel} = sprites
 
                 expect(ChannelState.balance(Sprites.ownIdx(sprites), channel))

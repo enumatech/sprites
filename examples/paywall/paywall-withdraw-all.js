@@ -9,21 +9,21 @@
 const {identity} = require('ramda')
 const {log} = require('sprites/lib/fp.js')
 const {waitForAccounts} = require('sprites/lib/test-helpers.js')
-const Paywall = require('./paywall.js')
+const Publisher = require('./publisher.js')
 const PaywallApp = require('./paywall-app.js')
 
 async function start() {
-    const paywall = await PaywallApp.make()
-    await waitForAccounts(paywall.sprites.web3Provider)
+    const publisher = await PaywallApp.make()
+    await waitForAccounts(publisher.sprites.web3Provider)
 
     const chIds =
-        paywall.sprites.offChainReg.db
+        publisher.sprites.offChainReg.db
             .get('channels').map(identity).value()
 
     for (const {chId} of chIds) {
         log(`Withdrawing from channel ${chId}`)
         const {withdrawn, sprites: {channel}} =
-            await Paywall.publisherWithdraw(chId, paywall)
+            await Publisher.publisherWithdraw(chId, publisher)
         log(`Withdrawn ${withdrawn} tokens. New channel state:\n`, channel)
     }
 }

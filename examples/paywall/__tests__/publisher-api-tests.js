@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-// paywall-api-tests.js
+// publisher-api-tests.js
 // Enuma Sprites PoC
 //
 // Copyright (c) 2018 Enuma Technologies Limited.
@@ -12,23 +12,21 @@ const {Router} = express
 const PaywallApi = require('../paywall-api.js')
 const PaywallApiClient = require('../paywall-api-client.js')
 
-jest.mock('../paywall.js')
-const Paywall = require('../paywall.js')
+jest.mock('../publisher.js')
+const Publisher = require('../publisher.js')
 
 describe('PaywallApi', () => {
     let api
-    const paywall = {mock: "paywall"}
+    const publisher = {mock: "publisher"}
 
     beforeAll(async () => {
-        const paywallApi = PaywallApi(paywall, Router())
+        const paywallApi = PaywallApi(publisher, Router())
         const apiServer = express().use('/', paywallApi)
         const apiFetch = makeFetch(apiServer)
         api = PaywallApiClient(apiFetch)
     })
 
-    beforeEach(async () => {
-        jest.clearAllMocks()
-    })
+    beforeEach(() => jest.clearAllMocks())
 
     const resolve = (x) => Promise.resolve(x)
 
@@ -38,20 +36,20 @@ describe('PaywallApi', () => {
     describe('/config', () => {
         it('works', async () => {
             const config = {mock: "config"}
-            mock(Paywall.config, config)
+            mock(Publisher.config, config)
 
             await expect(api.config()).resolves.toMatchObject(config)
-            expect(Paywall.config).toBeCalledWith(paywall)
+            expect(Publisher.config).toBeCalledWith(publisher)
         })
     })
 
     describe('/catalog', () => {
         it('works', async () => {
             const catalog = {mock: "catalog"}
-            mock(Paywall.catalog, resolve(catalog))
+            mock(Publisher.catalog, resolve(catalog))
 
             await expect(api.catalog()).resolves.toMatchObject(catalog)
-            expect(Paywall.catalog).toBeCalledWith(paywall)
+            expect(Publisher.catalog).toBeCalledWith(publisher)
         })
     })
 
@@ -59,10 +57,10 @@ describe('PaywallApi', () => {
         it('works', async () => {
             const order = {mock: "order"}
             const invoice = {mock: "invoice"}
-            mock(Paywall.invoice, resolve({invoice}))
+            mock(Publisher.invoice, resolve({invoice}))
 
             await expect(api.invoice(order)).resolves.toMatchObject(invoice)
-            expect(Paywall.invoice).toBeCalledWith(order, paywall)
+            expect(Publisher.invoice).toBeCalledWith(order, publisher)
         })
     })
 
@@ -70,12 +68,12 @@ describe('PaywallApi', () => {
         it('works', async () => {
             const payment = {mock: "payment"}
             const paymentReceipt = {mock: "paymentReceipt"}
-            mock(Paywall.processPayment, resolve({paymentReceipt}))
+            mock(Publisher.processPayment, resolve({paymentReceipt}))
 
             await expect(api.processPayment(payment))
                 .resolves.toMatchObject(paymentReceipt)
 
-            expect(Paywall.processPayment).toBeCalledWith(payment, paywall)
+            expect(Publisher.processPayment).toBeCalledWith(payment, publisher)
         })
     })
 
@@ -83,12 +81,12 @@ describe('PaywallApi', () => {
         it('works', async () => {
             const receipt = {mock: "receipt"}
             const article = {mock: "article"}
-            mock(Paywall.getArticle, resolve({article}))
+            mock(Publisher.getArticle, resolve({article}))
 
             await expect(api.getArticle(receipt))
                 .resolves.toMatchObject(article)
 
-            expect(Paywall.getArticle).toBeCalledWith(receipt, paywall)
+            expect(Publisher.getArticle).toBeCalledWith(receipt, publisher)
         })
     })
 
@@ -96,12 +94,12 @@ describe('PaywallApi', () => {
         it('works', async () => {
             const chId = 123
             const withdrawn = {withdrawn: 456}
-            mock(Paywall.publisherWithdraw, resolve(withdrawn))
+            mock(Publisher.publisherWithdraw, resolve(withdrawn))
 
             await expect(api.publisherWithdraw(chId))
                 .resolves.toMatchObject(withdrawn)
 
-            expect(Paywall.publisherWithdraw).toBeCalledWith(chId, paywall)
+            expect(Publisher.publisherWithdraw).toBeCalledWith(chId, publisher)
         })
     })
 })

@@ -11,7 +11,7 @@ const {__, indexBy, prop, assocPath} = require('ramda')
 const {thread, threadP} = require('sprites/lib/fp.js')
 const Sprites = require('sprites')
 const OffChainRegistry = require('sprites/lib/off-chain-registry.js')
-const Paywall = require('../paywall.js')
+const Publisher = require('../publisher.js')
 const PaywallClient = require('../paywall-client.js')
 
 const balance = async ({sprites}) =>
@@ -36,7 +36,7 @@ describe('Sprites paywall demo flow using APIs directly', () => {
         const {accounts: {ALICE, BOB}, ...spritesTemplate} =
             await Sprites.testDeploy({web3Provider})
 
-        publisher = Paywall.make({
+        publisher = Publisher.make({
             db: ArticleDB,
             sprites: thread({
                     ...spritesTemplate,
@@ -49,7 +49,7 @@ describe('Sprites paywall demo flow using APIs directly', () => {
         })
 
         visitor = await PaywallClient.withPaywall(
-            Paywall.config(publisher),
+            Publisher.config(publisher),
             PaywallClient.make({
                 sprites: Sprites.withRemoteSigner(
                     Sprites.make({
@@ -72,7 +72,7 @@ describe('Sprites paywall demo flow using APIs directly', () => {
         beforeAll(async () => {
             publisherOpeningBalance = await balance(publisher)
             readerOpeningBalance = await balance(visitor)
-            article = (await Paywall.catalog(publisher))[0]
+            article = (await Publisher.catalog(publisher))[0]
             content = ArticleDB[article.id].content
             const deposit = article.price + extraDeposit
             reader = await threadP(visitor,
@@ -92,14 +92,14 @@ describe('Sprites paywall demo flow using APIs directly', () => {
 
                 receipt = await threadP(
                     reader,
-                    prop('order'), Paywall.invoice(__, publisher),
+                    prop('order'), Publisher.invoice(__, publisher),
                     prop('invoice'), PaywallClient.pay(__, reader),
-                    prop('payment'), Paywall.processPayment(__, publisher),
+                    prop('payment'), Publisher.processPayment(__, publisher),
                     prop('paymentReceipt'), PaywallClient.processReceipt(__, reader),
                     prop('receipt'))
 
                 paidArticle =
-                    (await Paywall.getArticle(receipt, publisher)).article
+                    (await Publisher.getArticle(receipt, publisher)).article
             })
 
             it('is readable', () =>
@@ -111,14 +111,14 @@ describe('Sprites paywall demo flow using APIs directly', () => {
             })
 
             describe('when the Publisher withdraws', () => {
-                beforeAll(() => Paywall.publisherWithdraw(chId, publisher))
+                beforeAll(() => Publisher.publisherWithdraw(chId, publisher))
 
                 it('their on-chain balance reflects the payment', () =>
                     expect(balance(publisher)).resolves
                         .toEqual(publisherOpeningBalance + article.price))
 
                 describe('and the Reader withdraws too', () => {
-                    beforeAll(() => Paywall.readerWithdraw(chId, publisher))
+                    beforeAll(() => Publisher.readerWithdraw(chId, publisher))
 
                     it.skip('their on-chain balance reflects the payment', () =>
                         expect(balance(reader)).resolves
