@@ -7,15 +7,18 @@
 // ----------------------------------------------------------------------------
 
 const {makeProvider} = require('sprites/lib/test-helpers.js')
-const {__, indexBy, prop, assocPath, dissoc, identity} = require('ramda')
+const {__, indexBy, prop, assocPath} = require('ramda')
 const {thread, threadP} = require('sprites/lib/fp.js')
 const Sprites = require('sprites')
 const OffChainRegistry = require('sprites/lib/off-chain-registry.js')
 const Paywall = require('../paywall.js')
 const PaywallClient = require('../paywall-client.js')
 
-describe('Sprites paywall demo', () => {
-    let Visitor, Publisher, web3Provider
+const balance = async ({sprites}) =>
+    (await Sprites.tokenBalance(sprites)).tokenBalance
+
+describe('Sprites paywall demo flow using APIs directly', () => {
+    let visitor, publisher, web3Provider
     const Articles = [
         {
             id: "aId-1",
@@ -27,13 +30,13 @@ describe('Sprites paywall demo', () => {
     ]
     const ArticleDB = indexBy(prop('id'), Articles)
 
-    beforeAll(async () => {
-        web3Provider = makeProvider()
-        const spritesDeployment = await Sprites.testDeploy({web3Provider})
-        ;({ALICE, BOB} = spritesDeployment.accounts)
-        const spritesTemplate = dissoc('accounts', spritesDeployment)
+    beforeAll(() => web3Provider = makeProvider())
 
-        Publisher = Paywall.make({
+    beforeAll(async () => {
+        const {accounts: {ALICE, BOB}, ...spritesTemplate} =
+            await Sprites.testDeploy({web3Provider})
+
+        publisher = Paywall.make({
             db: ArticleDB,
             sprites: thread({
                     ...spritesTemplate,
@@ -45,8 +48,8 @@ describe('Sprites paywall demo', () => {
                 Sprites.withWeb3Contracts),
         })
 
-        Visitor = await PaywallClient.withPaywall(
-            Paywall.config(Publisher),
+        visitor = await PaywallClient.withPaywall(
+            Paywall.config(publisher),
             PaywallClient.make({
                 sprites: Sprites.withRemoteSigner(
                     Sprites.make({
@@ -61,70 +64,66 @@ describe('Sprites paywall demo', () => {
     afterAll(() => web3Provider.connection.destroy())
 
     describe('1st article', function () {
-        let Reader, article
+        let reader, chId, article, content,
+            publisherOpeningBalance,
+            readerOpeningBalance
+        const extraDeposit = 5
 
         beforeAll(async () => {
-            const catalog = await Paywall.catalog(Publisher)
-            article = catalog[0]
-            Reader = await threadP(Visitor,
-                PaywallClient.approve(article.price),
-                PaywallClient.firstDeposit(article.price),
+            publisherOpeningBalance = await balance(publisher)
+            readerOpeningBalance = await balance(visitor)
+            article = (await Paywall.catalog(publisher))[0]
+            content = ArticleDB[article.id].content
+            const deposit = article.price + extraDeposit
+            reader = await threadP(visitor,
+                PaywallClient.approve(deposit),
+                PaywallClient.firstDeposit(deposit),
                 PaywallClient.order(article.id),
                 assocPath(['sprites', 'ACTOR_NAME'], 'Reader'))
+            chId = reader.sprites.chId
         })
 
         describe('after payment', function () {
             let receipt, paidArticle
 
             beforeAll(async () => {
-                const propLog = p => o =>
-                    (log(p + ':\n', prop(p, o)), prop(p, o))
+                // const propLog = p => o =>
+                //     (log(p + ':\n', prop(p, o)), prop(p, o))
 
                 receipt = await threadP(
-                    Reader,
-                    prop('order'), Paywall.invoice(__, Publisher),
-                    prop('invoice'), PaywallClient.pay(__, Reader),
-                    prop('payment'), Paywall.processPayment(__, Publisher),
-                    prop('paymentReceipt'), PaywallClient.processReceipt(__, Reader),
+                    reader,
+                    prop('order'), Paywall.invoice(__, publisher),
+                    prop('invoice'), PaywallClient.pay(__, reader),
+                    prop('payment'), Paywall.processPayment(__, publisher),
+                    prop('paymentReceipt'), PaywallClient.processReceipt(__, reader),
                     prop('receipt'))
-                ;({article: paidArticle} =
-                    await Paywall.getArticle(receipt, Publisher))
+
+                paidArticle =
+                    (await Paywall.getArticle(receipt, publisher)).article
             })
 
-            it('is readable', async () => {
-                expect(paidArticle)
-                    .toMatchObject({content: ArticleDB[article.id].content})
-            })
+            it('is readable', () =>
+                expect(paidArticle).toMatchObject({content}))
 
             it('is saved in the Reader\'s library', async () => {
-                const library = await PaywallClient.library(Reader)
+                const library = await PaywallClient.library(reader)
                 expect(library).toMatchObject({[article.id]: receipt})
             })
 
-            describe('when withdrawn by the Publisher', () => {
-                let initialBalance
+            describe('when the Publisher withdraws', () => {
+                beforeAll(() => Paywall.publisherWithdraw(chId, publisher))
 
-                beforeAll(async () => {
-                    ;({tokenBalance: initialBalance} =
-                        await Sprites.tokenBalance(Publisher.sprites))
+                it('their on-chain balance reflects the payment', () =>
+                    expect(balance(publisher)).resolves
+                        .toEqual(publisherOpeningBalance + article.price))
 
-                    const chIds =
-                        Publisher.sprites.offChainReg.db
-                            .get('channels').map(identity).value()
+                describe('and the Reader withdraws too', () => {
+                    beforeAll(() => Paywall.readerWithdraw(chId, publisher))
 
-                    for (const {chId} of chIds) {
-                        await Paywall.publisherWithdraw(chId, Publisher)
-                    }
+                    it.skip('their on-chain balance reflects the payment', () =>
+                        expect(balance(reader)).resolves
+                            .toEqual(readerOpeningBalance - article.price))
                 })
-
-                it('the payment is reflected on their on-chain balance',
-                    async () => {
-                        const {tokenBalance} =
-                            await Sprites.tokenBalance(Publisher.sprites)
-
-                        expect(tokenBalance)
-                            .toEqual(initialBalance + article.price)
-                    })
             })
         })
     })

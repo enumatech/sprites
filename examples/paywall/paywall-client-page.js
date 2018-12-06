@@ -87,6 +87,14 @@ async function publisherWithdraw() {
     render()
 }
 
+async function readerWithdraw() {
+    const chId = pwc.sprites.chId
+    const {withdrawn} = await paywall.readerWithdraw(chId)
+    console.log('withdrawn', withdrawn)
+    pwc = await PaywallClient.channel(chId, pwc)
+    render()
+}
+
 /**
  * Components
  * */

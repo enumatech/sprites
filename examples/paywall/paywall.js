@@ -157,6 +157,9 @@ const Paywall = {
         return {...paywall, sprites: spritesAfter, withdrawn}
     }),
 
+    readerWithdraw: curry(async (chId, paywall) => {
+    }),
+
     channel: curry(async (chId, paywall) => {
         const sprites = await Sprites.channelState({...paywall.sprites, chId})
         return {...paywall, sprites}
