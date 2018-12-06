@@ -149,7 +149,7 @@ Now the publisher can choose to withdraw their balance onto the blockchain.
 For this we provide a command-line utility:
 
 ```
-node paywall-withdraw-all.js
+node publisher-withdraw-all.js
 ```
 
 After running that, we can switch to Bob in MetaMask and see their balance

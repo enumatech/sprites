@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-// paywall-withdraw-all.js
+// publisher-withdraw-all.js
 // Enuma Sprites PoC
 //
 // Copyright (c) 2018 Enuma Technologies Limited.
@@ -10,10 +10,10 @@ const {identity} = require('ramda')
 const {log} = require('sprites/lib/fp.js')
 const {waitForAccounts} = require('sprites/lib/test-helpers.js')
 const Publisher = require('./publisher.js')
-const PaywallApp = require('./paywall-app.js')
+const PublisherApp = require('./publisher-app.js')
 
 async function start() {
-    const publisher = await PaywallApp.make()
+    const publisher = await PublisherApp.make()
     await waitForAccounts(publisher.sprites.web3Provider)
 
     const chIds =

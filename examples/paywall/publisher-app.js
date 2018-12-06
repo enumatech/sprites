@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-// paywall-app.js
+// publisher-app.js
 // Enuma Sprites PoC
 //
 // Copyright (c) 2018 Enuma Technologies Limited.
@@ -51,7 +51,7 @@ const offChainRegInit = (dbDir, onChainRegAddr) => {
 
 const offChainRegPath = offChainRegInit('off-chain-reg', spritesConfig.reg)
 
-const PaywallApp = {
+const PublisherApp = {
     async make() {
         const spritesDb = await low(new LowFile(offChainRegPath))
         return Publisher.make({
@@ -72,4 +72,4 @@ const PaywallApp = {
     }
 }
 
-module.exports = PaywallApp
+module.exports = PublisherApp
