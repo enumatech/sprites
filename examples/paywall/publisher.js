@@ -36,7 +36,7 @@ const Publisher = {
     },
 
     /**
-     * Returns parameters necessary for a PaywallClient to establish
+     * Returns parameters necessary for a Reader to establish
      * payment channels with the Publisher
      * */
     config(paywall) {
