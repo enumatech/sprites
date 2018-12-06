@@ -112,7 +112,7 @@ It is accessible via http://localhost:9966.
 ## Usage
 
 We assume you switched to Alice in MetaMask and you are on the paywall
-web page.
+reader web page.
 
 You can open a channel with the publisher, which will take 2 blockchain
 transactions. The 1st one is an approval to the sprites channel registry

@@ -81,14 +81,14 @@ encountered this error:
 geth    | Fatal: Error starting protocol stack: listen tcp 0.0.0.0:8545: bind: address already in use.
 geth    |
 geth    | Exited
-client  | Interrupting...
+reader  | Interrupting...
 solc    | Interrupting...
-paywall | Interrupting...
-client  |
-paywall |
-paywall | Exited
+publisher | Interrupting...
+reader  |
+publisher |
+publisher | Exited
 solc    | Exited
-client  | Exited
+reader  | Exited
 ```
 
 It means you already have a `go-ethereum` node running on port `8545`,

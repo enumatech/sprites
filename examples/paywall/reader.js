@@ -51,17 +51,17 @@ const Reader = {
      * some bytecode, otherwise calls to such contracts might
      * just silently succeed.
      * */
-    validatePaywall: curry(async (paywallConfig, rdr) => {
+    validatePaywall: curry(async (publisherConfig, rdr) => {
         const {web3Provider} = rdr.sprites
         const eth = new Web3Eth(web3Provider)
 
         const hasCode = async (contractName) => {
-            if (!(contractName in paywallConfig))
+            if (!(contractName in publisherConfig))
                 throw new Error(
                     `No address for the "${contractName}" contract in config:\n` +
-                    inspect(paywallConfig))
+                    inspect(publisherConfig))
 
-            const addr = paywallConfig[contractName]
+            const addr = publisherConfig[contractName]
             if (await eth.getCode(addr) === '0x')
                 throw new Error(
                     `No code found for contract "${contractName}"` +

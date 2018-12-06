@@ -6,7 +6,7 @@
 // https://www.enuma.io/
 // ----------------------------------------------------------------------------
 
-const {indexBy, prop, assoc, dissoc, keys} = require('ramda')
+const {indexBy, prop, assoc, dissoc, keys, identity} = require('ramda')
 const {thread, threadP} = require('sprites/lib/fp.js')
 const {ZERO_ADDR, makeProvider} = require('sprites/lib/test-helpers.js')
 const OffChainRegistry = require('sprites/lib/off-chain-registry.js')
@@ -49,7 +49,7 @@ describe('Reader', () => {
             sprites: Sprites.withRemoteSigner(
                 Sprites.make({
                     web3Provider,
-                    ACTOR_NAME: 'Paywall Client',
+                    ACTOR_NAME: 'Reader',
                     ownAddress: ALICE,
                     offChainReg: new OffChainRegistry({ownAddress: ALICE})
                 })
@@ -110,37 +110,40 @@ describe('Reader', () => {
 
     describe('.validatePaywall', () => {
         it('works', async () => {
-            const paywallConfig = Publisher.config(publisher)
+            const publisherConfig = Publisher.config(publisher)
+            const validate = (transform) =>
+                Reader.validatePaywall(transform(publisherConfig), reader0)
 
-            await expect(Reader.validatePaywall(paywallConfig, reader0))
+            await expect(validate(identity))
                 .resolves.toHaveLength(3)
 
-            await expect(Reader.validatePaywall(dissoc('reg', paywallConfig), reader0))
+            await expect(validate(dissoc('reg')))
                 .rejects.toThrowError(/No address .+"reg"/i)
 
-            await expect(Reader.validatePaywall(assoc('reg', ZERO_ADDR, paywallConfig), reader0))
+            await expect(validate(assoc('reg', ZERO_ADDR)))
                 .rejects.toThrowError(/No code .+"reg"/i)
 
-            await expect(Reader.validatePaywall(dissoc('preimageManager', paywallConfig), reader0))
+            await expect(validate(dissoc('preimageManager')))
                 .rejects.toThrowError(/No address .+"preimageManager"/i)
 
-            await expect(Reader.validatePaywall(assoc('preimageManager', ZERO_ADDR, paywallConfig), reader0))
+            await expect(validate(assoc('preimageManager', ZERO_ADDR)))
                 .rejects.toThrowError(/No code .+"preimageManager"/i)
 
-            await expect(Reader.validatePaywall(dissoc('token', paywallConfig), reader0))
+            await expect(validate(dissoc('token')))
                 .rejects.toThrowError(/No address .+"token"/i)
 
-            await expect(Reader.validatePaywall(assoc('token', ZERO_ADDR, paywallConfig), reader0))
+            await expect(validate(assoc('token', ZERO_ADDR)))
                 .rejects.toThrowError(/No code .+"token"/i)
         })
     })
 
-    describe('when connected to a Paywall', () => {
-        let paywallConfig, connectedClient
+    describe('when connected to a Publisher', () => {
+        let publisherConfig, connectedClient
 
         beforeAll(async () => {
-            paywallConfig = Publisher.config(publisher)
-            connectedClient = await Reader.withPaywall(paywallConfig, reader0)
+            publisherConfig = Publisher.config(publisher)
+            connectedClient =
+                await Reader.withPaywall(publisherConfig, reader0)
         })
 
         describe('to buy an article from a publisher', () => {
@@ -159,7 +162,7 @@ describe('Reader', () => {
             describe('.withPaywall', () => {
                 it('restores the open channel', async () => {
                     const reconnectedClient =
-                        await Reader.withPaywall(paywallConfig, reader0)
+                        await Reader.withPaywall(publisherConfig, reader0)
 
                     expect(reconnectedClient.sprites.chId)
                         .toEqual(reader.sprites.chId)

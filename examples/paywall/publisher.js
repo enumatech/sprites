@@ -39,8 +39,8 @@ const Publisher = {
      * Returns parameters necessary for a Reader to establish
      * payment channels with the Publisher
      * */
-    config(paywall) {
-        const {sprites: {ownAddress, preimageManager, reg, token}} = paywall
+    config(publisher) {
+        const {sprites: {ownAddress, preimageManager, reg, token}} = publisher
         return {
             publisher: ownAddress,
             preimageManager: address(preimageManager),
@@ -49,16 +49,16 @@ const Publisher = {
         }
     },
 
-    async catalog(paywall) {
+    async catalog(publisher) {
         const publicFields = ['id', 'price', 'title', 'blurb']
-        return project(publicFields, values(paywall.db))
+        return project(publicFields, values(publisher.db))
     },
 
     /**
      * Create an invoice for an order.
      * */
-    invoice: curry(async (order, paywall) => {
-        const {db} = paywall
+    invoice: curry(async (order, publisher) => {
+        const {db} = publisher
         const {chId, articleId} = order
 
         const article = db[articleId]
@@ -67,14 +67,14 @@ const Publisher = {
         const {price} = article
         assert(price, `Missing price for article id: ${articleId}`)
 
-        const sprites = await threadP({...paywall.sprites, chId},
+        const sprites = await threadP({...publisher.sprites, chId},
             Sprites.channelState,
             Sprites.cmd.invoice(price),
             Sprites.sign)
         const {cmd, channel: {round, sigs}} = sprites
 
         return {
-            ...paywall,
+            ...publisher,
             sprites,
             invoice: {articleId, price, cmd, chId, round, sigs}
         }
@@ -84,14 +84,14 @@ const Publisher = {
         return Buffer.concat([toBuffer(articleId), toUnsigned(new BN(chId))])
     },
 
-    receiptSig: curry(async (unsignedReceipt, paywall) => {
-        const {sprites} = paywall
+    receiptSig: curry(async (unsignedReceipt, publisher) => {
+        const {sprites} = publisher
         const sig = await thread(
             unsignedReceipt,
             Publisher.receiptData,
             bufferToHex,
             addHexPrefix,
-            paywall.sprites.sign)
+            publisher.sprites.sign)
 
         sig.by = {actor: sprites.ACTOR_NAME, addr: sprites.ownAddress}
         sig.receipt = unsignedReceipt
@@ -103,13 +103,13 @@ const Publisher = {
         return sig
     }),
 
-    processPayment: curry(async (payment, paywall) => {
+    processPayment: curry(async (payment, publisher) => {
         const {articleId, chId, cmd, sigs} = payment
         const [buyerSig, _sellerSig] = sigs
         assert(buyerSig,
             `Signature missing from payment:\n` + inspect(payment))
 
-        const sprites = await threadP(paywall.sprites,
+        const sprites = await threadP(publisher.sprites,
             assoc('chId', chId),
             Sprites.channelState,
             assoc('cmd', cmd),
@@ -122,25 +122,29 @@ const Publisher = {
             + 'in channel:\n'
             + inspect(sprites.channel))
 
-        const sig = await Publisher.receiptSig({articleId, chId}, paywall)
+        const sig = await Publisher.receiptSig({articleId, chId}, publisher)
 
         await Sprites.save(sprites)
-        return {...paywall, sprites, paymentReceipt: {articleId, chId, sig, payment}}
+        return {
+            ...publisher,
+            sprites,
+            paymentReceipt: {articleId, chId, sig, payment}
+        }
     }),
 
-    getArticle: curry(async (receipt, paywall) => {
+    getArticle: curry(async (receipt, publisher) => {
         const {sig, articleId} = receipt
         const receiptHash = hashPersonalMessage(Publisher.receiptData(receipt))
-        const {sprites} = paywall
+        const {sprites} = publisher
         assert(Sign.by(sprites.ownAddress, receiptHash, sig),
             `Invalid signture on receipt:\n` + inspect(receipt))
-        const article = paywall.db[articleId]
-        return {...paywall, article}
+        const article = publisher.db[articleId]
+        return {...publisher, article}
     }),
 
-    publisherWithdraw: curry(async (chId, paywall) => {
+    publisherWithdraw: curry(async (chId, publisher) => {
         const spritesBefore = await threadP(
-            paywall,
+            publisher,
             Publisher.channel(chId),
             prop('sprites'))
 
@@ -154,25 +158,27 @@ const Publisher = {
         const withdrawn =
             spritesAfter.channel.withdrawn[ownIdx] -
             spritesBefore.channel.withdrawn[ownIdx]
-        return {...paywall, sprites: spritesAfter, withdrawn}
+        return {...publisher, sprites: spritesAfter, withdrawn}
     }),
 
-    readerWithdraw: curry(async (chId, paywall) => {
+    readerWithdraw: curry(async (chId, publisher) => {
     }),
 
-    channel: curry(async (chId, paywall) => {
-        const sprites = await Sprites.channelState({...paywall.sprites, chId})
-        return {...paywall, sprites}
+    channel: curry(async (chId, publisher) => {
+        return {
+            ...publisher,
+            sprites: await Sprites.channelState({...publisher.sprites, chId})
+        }
     }),
 
     /**
-     * Returns the off-chain balance of the paywall,
+     * Returns the off-chain balance of the publisher,
      * irregardless of its player index.
      *
      * It's meant to be a testing convenience, hence not chainable.
      * */
-    balance: curry(async (chId, paywall) => {
-        const {sprites} = await Publisher.channel(chId, paywall)
+    balance: curry(async (chId, publisher) => {
+        const {sprites} = await Publisher.channel(chId, publisher)
         return ChannelState.balance(Sprites.ownIdx(sprites), sprites.channel)
     })
 }

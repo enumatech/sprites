@@ -155,11 +155,11 @@ describe('Publisher', () => {
                 expect(ChannelState.checkAvailSigs(channel)).toBe(true)
                 // If the invoice signatures match the channel state sigs,
                 // we can make assertions about the channel state, which
-                // state should be reconstructible by the paywall client.
+                // state should be reconstructible by the reader.
                 expect(invoice.sigs).toEqual(channel.sigs)
             })
 
-            it('transfers the aritcle price to the paywall', () => {
+            it('transfers the aritcle price to the publisher', () => {
                 expect(PWinv.sprites.channel.credits)
                     .toEqual([-article.price, article.price])
             })
@@ -239,7 +239,7 @@ describe('Publisher', () => {
                     //    references the article
                     //    references the buyer/payment, so it can be rejected if necessary
                     //    doesn't require looking up old channel state (for simplicity)
-                    //    can only be calculated by the paywall
+                    //    can only be calculated by the publisher
                     //    it's a plus if its authenticity can be verified without db lookup
                     expect(receipt).toMatchObject({articleId, chId})
                     expect(receipt).toHaveProperty('sig')
