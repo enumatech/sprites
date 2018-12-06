@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-// paywall-api.js
+// publisher-api.js
 // Enuma Sprites PoC
 //
 // Copyright (c) 2018 Enuma Technologies Limited.
@@ -15,7 +15,7 @@ const Jayson = require('sprites/lib/jayson')
  * Returns the `router` object with API routes defined on it,
  * which will use the `paywall` parameter to do their job.
  * */
-function PaywallApi(paywall, router) {
+function PublisherApi(paywall, router) {
     router = decorateApp(router)
     JSON.parse = Jayson.parse('Smart JSON parser')
     router.use(bodyParser.json())
@@ -56,4 +56,4 @@ function PaywallApi(paywall, router) {
     return router
 }
 
-module.exports = PaywallApi
+module.exports = PublisherApi

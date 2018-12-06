@@ -9,19 +9,19 @@
 const {makeFetch} = require('supertest-fetch')
 const express = require('express')
 const {Router} = express
-const PaywallApi = require('../paywall-api.js')
+const PublisherApi = require('../publisher-api.js')
 const PaywallApiClient = require('../paywall-api-client.js')
 
 jest.mock('../publisher.js')
 const Publisher = require('../publisher.js')
 
-describe('PaywallApi', () => {
+describe('PublisherApi', () => {
     let api
     const publisher = {mock: "publisher"}
 
     beforeAll(async () => {
-        const paywallApi = PaywallApi(publisher, Router())
-        const apiServer = express().use('/', paywallApi)
+        const publisherApi = PublisherApi(publisher, Router())
+        const apiServer = express().use('/', publisherApi)
         const apiFetch = makeFetch(apiServer)
         api = PaywallApiClient(apiFetch)
     })
