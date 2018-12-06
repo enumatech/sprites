@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-// paywall-api-client.js
+// publisher-api-client.js
 // Enuma Sprites PoC
 //
 // Copyright (c) 2018 Enuma Technologies Limited.

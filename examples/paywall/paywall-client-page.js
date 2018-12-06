@@ -22,7 +22,7 @@ const OffChainRegistry = require('sprites/lib/off-chain-registry.js')
 const Sign = require('sprites/lib/sign.js')
 const Sprites = require('sprites')
 const PaywallClient = require('./paywall-client.js')
-const PaywallApiClient = require('./paywall-api-client.js')
+const PublisherApiClient = require('./publisher-api-client.js')
 const dom = require('./dom.js')
 const {
     $, frag, disabled, div, span, p, pre, a, h1, h2, h3, table, tr, th, td,
@@ -30,9 +30,9 @@ const {
 } = dom
 
 const serverPort = 3000
-const paywallUrl = `http://localhost:${serverPort}`
-const paywallFetch = async (url, opts) => fetch(paywallUrl + url, opts)
-const paywall = PaywallApiClient(paywallFetch)
+const publisherUrl = `http://localhost:${serverPort}`
+const publisherFetch = async (url, opts) => fetch(publisherUrl + url, opts)
+const publisher = PublisherApiClient(publisherFetch)
 
 /**
  * App state
@@ -56,14 +56,14 @@ async function buyArticle(id) {
     const {order} = pwc
     // console.log('order', order)
 
-    const invoice = await paywall.invoice(order)
+    const invoice = await publisher.invoice(order)
     // console.log('invoice', invoice)
 
     pwc = await PaywallClient.pay(invoice, pwc)
     const {payment} = pwc
     // console.log('payment', payment)
 
-    const paymentReceipt = await paywall.processPayment(payment)
+    const paymentReceipt = await publisher.processPayment(payment)
     // console.log('paymentReceipt', paymentReceipt)
 
     pwc = await PaywallClient.processReceipt(paymentReceipt, pwc)
@@ -81,7 +81,7 @@ async function buyArticle(id) {
 
 async function publisherWithdraw() {
     const chId = pwc.sprites.chId
-    const {withdrawn} = await paywall.publisherWithdraw(chId)
+    const {withdrawn} = await publisher.publisherWithdraw(chId)
     console.log('withdrawn', withdrawn)
     pwc = await PaywallClient.channel(chId, pwc)
     render()
@@ -89,7 +89,7 @@ async function publisherWithdraw() {
 
 async function readerWithdraw() {
     const chId = pwc.sprites.chId
-    const {withdrawn} = await paywall.readerWithdraw(chId)
+    const {withdrawn} = await publisher.readerWithdraw(chId)
     console.log('withdrawn', withdrawn)
     pwc = await PaywallClient.channel(chId, pwc)
     render()
@@ -205,12 +205,12 @@ async function setRoute(view, params) {
             break
 
         case 'catalog':
-            catalog = await paywall.catalog()
+            catalog = await publisher.catalog()
             library = await PaywallClient.library(pwc)
             break
 
         case 'article':
-            article = await paywall.getArticle(params.receipt)
+            article = await publisher.getArticle(params.receipt)
             break
 
         default:
@@ -243,25 +243,25 @@ async function start() {
     console.info(`Using Ethereum address: ${ownAddress}`)
     const eth = new Web3Eth(web3Provider)
 
-    const paywallConfig = await paywall.config()
+    const publisherConfig = await publisher.config()
 
     pwc = await PaywallClient.withPaywall(
-        paywallConfig,
+        publisherConfig,
         PaywallClient.make({
-            db: low(new LowStorage(`library-${paywallConfig.reg}`)),
+            db: low(new LowStorage(`library-${publisherConfig.reg}`)),
             sprites: Sprites.make({
                 web3Provider,
                 ownAddress,
                 ACTOR_NAME: 'Paywall Client',
                 offChainReg: new OffChainRegistry({
                     ownAddress,
-                    db: low(new LowStorage(`sprites-${paywallConfig.reg}`))
+                    db: low(new LowStorage(`sprites-${publisherConfig.reg}`))
                 }),
                 sign: Sign.personal(web3Provider, ownAddress)
             })
         })
     )
-    // await PaywallClient.validatePaywall(paywallConfig, pwc)
+    // await PaywallClient.validatePaywall(publisherConfig, pwc)
     console.info('Paywall client (pwc)', pwc)
 
     await setRoute('catalog')
@@ -275,7 +275,7 @@ async function start() {
 Object.assign(window, {
     ...NAMED_ACCOUNTS, // DEPLOYER, ALICE, BOB, EVE
     util, Web3Eth, Web3EthContract, Sprites, PaywallClient,
-    paywall, setRoute, render
+    publisher, setRoute, render
 })
 
 // Expose mutable app state dynamically
