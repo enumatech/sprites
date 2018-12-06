@@ -12,7 +12,7 @@ const {thread, threadP} = require('sprites/lib/fp.js')
 const Sprites = require('sprites')
 const OffChainRegistry = require('sprites/lib/off-chain-registry.js')
 const Publisher = require('../publisher.js')
-const PaywallClient = require('../paywall-client.js')
+const Reader = require('../reader.js')
 
 const balance = async ({sprites}) =>
     (await Sprites.tokenBalance(sprites)).tokenBalance
@@ -48,9 +48,9 @@ describe('Sprites paywall demo flow using APIs directly', () => {
                 Sprites.withWeb3Contracts),
         })
 
-        visitor = await PaywallClient.withPaywall(
+        visitor = await Reader.withPaywall(
             Publisher.config(publisher),
-            PaywallClient.make({
+            Reader.make({
                 sprites: Sprites.withRemoteSigner(
                     Sprites.make({
                         web3Provider,
@@ -76,9 +76,9 @@ describe('Sprites paywall demo flow using APIs directly', () => {
             content = ArticleDB[article.id].content
             const deposit = article.price + extraDeposit
             reader = await threadP(visitor,
-                PaywallClient.approve(deposit),
-                PaywallClient.firstDeposit(deposit),
-                PaywallClient.order(article.id),
+                Reader.approve(deposit),
+                Reader.firstDeposit(deposit),
+                Reader.order(article.id),
                 assocPath(['sprites', 'ACTOR_NAME'], 'Reader'))
             chId = reader.sprites.chId
         })
@@ -93,9 +93,9 @@ describe('Sprites paywall demo flow using APIs directly', () => {
                 receipt = await threadP(
                     reader,
                     prop('order'), Publisher.invoice(__, publisher),
-                    prop('invoice'), PaywallClient.pay(__, reader),
+                    prop('invoice'), Reader.pay(__, reader),
                     prop('payment'), Publisher.processPayment(__, publisher),
-                    prop('paymentReceipt'), PaywallClient.processReceipt(__, reader),
+                    prop('paymentReceipt'), Reader.processReceipt(__, reader),
                     prop('receipt'))
 
                 paidArticle =
@@ -106,7 +106,7 @@ describe('Sprites paywall demo flow using APIs directly', () => {
                 expect(paidArticle).toMatchObject({content}))
 
             it('is saved in the Reader\'s library', async () => {
-                const library = await PaywallClient.library(reader)
+                const library = await Reader.library(reader)
                 expect(library).toMatchObject({[article.id]: receipt})
             })
 

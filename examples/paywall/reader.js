@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-// paywall-client.js
+// reader.js
 // Enuma Sprites PoC
 //
 // Copyright (c) 2018 Enuma Technologies Limited.
@@ -16,7 +16,7 @@ const LowMem = require('lowdb/adapters/Memory')
 const Sprites = require('sprites')
 const ChannelState = require('sprites/lib/channel-state.js')
 
-const PaywallClient = {
+const Reader = {
     make(opts={}) {
         return {
             db: low(new LowMem()),
@@ -29,11 +29,11 @@ const PaywallClient = {
      * Initialize the sprites client based on the configuration
      * returned by Paywall.config()
      * */
-    withPaywall: curry(async (config, pwc) => {
+    withPaywall: curry(async (config, rdr) => {
         const {publisher, preimageManager, reg, token} = config
-        const {sprites} = pwc
-        const pwcWithPaywall = {
-            ...pwc,
+        const {sprites} = rdr
+        const readerWithPaywall = {
+            ...rdr,
             publisher,
             sprites: Sprites.withWeb3Contracts({
                 ...sprites, preimageManager, reg, token
@@ -41,8 +41,8 @@ const PaywallClient = {
         }
         const chId = last(await sprites.offChainReg.with(publisher))
 
-        const maybeWithChannel = isNil(chId) ? identity : PaywallClient.channel(chId)
-        return maybeWithChannel(pwcWithPaywall)
+        const maybeWithChannel = isNil(chId) ? identity : Reader.channel(chId)
+        return maybeWithChannel(readerWithPaywall)
     }),
 
     /**
@@ -51,8 +51,8 @@ const PaywallClient = {
      * some bytecode, otherwise calls to such contracts might
      * just silently succeed.
      * */
-    validatePaywall: curry(async (paywallConfig, pwc) => {
-        const {web3Provider} = pwc.sprites
+    validatePaywall: curry(async (paywallConfig, rdr) => {
+        const {web3Provider} = rdr.sprites
         const eth = new Web3Eth(web3Provider)
 
         const hasCode = async (contractName) => {
@@ -73,12 +73,12 @@ const PaywallClient = {
     /**
      * Retrieve the receipts for the already bought articles
      */
-    library: async (pwc) =>
-        pwc.db.value(),
+    library: async (rdr) =>
+        rdr.db.value(),
 
-    saveReceipt: curry(async (receipt, pwc) => {
-        await pwc.db.set(receipt.articleId, receipt).write()
-        return pwc
+    saveReceipt: curry(async (receipt, rdr) => {
+        await rdr.db.set(receipt.articleId, receipt).write()
+        return rdr
     }),
 
     /**
@@ -88,10 +88,10 @@ const PaywallClient = {
      *
      * Requires a signature.
      * */
-    approve: curry(async (amount, pwc) => {
-        const {sprites} = pwc
+    approve: curry(async (amount, rdr) => {
+        const {sprites} = rdr
         return {
-            ...pwc,
+            ...rdr,
             sprites: await Sprites.approve(amount, sprites)
         }
     }),
@@ -102,10 +102,10 @@ const PaywallClient = {
      *
      * Requires a signature.
      * */
-    firstDeposit: curry(async (amount, pwc) => {
-        const {publisher, sprites} = pwc
+    firstDeposit: curry(async (amount, rdr) => {
+        const {publisher, sprites} = rdr
         return {
-            ...pwc,
+            ...rdr,
             sprites: await threadP(sprites,
                 Sprites.createWithDeposit(publisher, amount),
                 Sprites.channelState,
@@ -118,10 +118,10 @@ const PaywallClient = {
      *
      * Paywall should return a signed `{invoice}` in exchange.
      * */
-    order: curry((articleId, pwc) => {
-        const {sprites: {chId}} = pwc
+    order: curry((articleId, rdr) => {
+        const {sprites: {chId}} = rdr
         return {
-            ...pwc,
+            ...rdr,
             order: {
                 articleId, chId
             }
@@ -133,14 +133,14 @@ const PaywallClient = {
      *
      * Returns a `{payment}` suitable for `Paywall.processPayment`.
      * */
-    pay: curry(async (invoice, pwc) => {
+    pay: curry(async (invoice, rdr) => {
         const {cmd, chId, round, sigs} = invoice
         const [_buyerSig, sellerSig] = sigs
 
         assert(sellerSig,
             `Invoice should have a signature:\n` + inspect(invoice))
 
-        const sprite = await threadP(pwc.sprites,
+        const sprite = await threadP(rdr.sprites,
             assoc('chId', chId),
             Sprites.channelState,
             assoc('cmd', cmd),
@@ -159,15 +159,15 @@ const PaywallClient = {
 
         const signedSprite = await Sprites.sign(sprite)
         const payment = {...invoice, sigs: signedSprite.channel.sigs}
-        return {...pwc, sprites: signedSprite, payment}
+        return {...rdr, sprites: signedSprite, payment}
     }),
 
-    channel: curry(async (chId, pwc) => {
-        const sprites = await Sprites.channelState({...pwc.sprites, chId})
-        return {...pwc, sprites}
+    channel: curry(async (chId, rdr) => {
+        const sprites = await Sprites.channelState({...rdr.sprites, chId})
+        return {...rdr, sprites}
     }),
 
-    processReceipt: curry(async (paymentReceipt, pwc) => {
+    processReceipt: curry(async (paymentReceipt, rdr) => {
         const {cmd, chId, round, sigs} = paymentReceipt.payment
         const [buyerSig, sellerSig] = sigs
 
@@ -179,7 +179,7 @@ const PaywallClient = {
             `Receipt should have a buyer signature:\n`
             + inspect(paymentReceipt))
 
-        const sprites = await threadP(pwc.sprites,
+        const sprites = await threadP(rdr.sprites,
             assoc('chId', chId),
             Sprites.channelState,
             assoc('cmd', cmd),
@@ -198,9 +198,9 @@ const PaywallClient = {
 
         await Sprites.save(sprites)
         const {payment, ...receipt} = paymentReceipt
-        await PaywallClient.saveReceipt(receipt, pwc)
-        return {...pwc, sprites, receipt}
+        await Reader.saveReceipt(receipt, rdr)
+        return {...rdr, sprites, receipt}
     })
 }
 
-module.exports = PaywallClient
+module.exports = Reader

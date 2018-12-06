@@ -15,7 +15,7 @@ const ChannelState = require('sprites/lib/channel-state.js')
 const Sprites = require('sprites')
 const OffChainRegistry = require('sprites/lib/off-chain-registry.js')
 const Publisher = require('../publisher.js')
-const PaywallClient = require('../paywall-client.js')
+const Reader = require('../reader.js')
 
 describe('Publisher.make', () => {
     it('works without params', async () => {
@@ -34,7 +34,7 @@ describe('Publisher.make', () => {
 })
 
 describe('Publisher', () => {
-    let publisher, PWC0, web3Provider
+    let publisher, reader0, web3Provider
     const newArticle = (id) => new Object({
         id: `aId-${id}`,
         price: 10 + id,
@@ -63,7 +63,7 @@ describe('Publisher', () => {
                 Sprites.withWeb3Contracts),
         })
 
-        PWC0 = PaywallClient.make({
+        reader0 = Reader.make({
             sprites: Sprites.withRemoteSigner(
                 Sprites.make({
                     web3Provider,
@@ -105,18 +105,18 @@ describe('Publisher', () => {
     })
 
     describe('with a connected client, buying an article', () => {
-        let PWC, order, chId
+        let reader, order, chId
         const article = Articles[0]
         const articleId = article.id
 
         beforeAll(async () => {
             const priceOfAllArticles = thread(Articles, pluck('price'), sum)
-            PWC = await threadP(PWC0,
-                PaywallClient.withPaywall(Publisher.config(publisher)),
-                PaywallClient.approve(priceOfAllArticles),
-                PaywallClient.firstDeposit(priceOfAllArticles),
-                PaywallClient.order(articleId))
-            ;({order, sprites: {chId}} = PWC)
+            reader = await threadP(reader0,
+                Reader.withPaywall(Publisher.config(publisher)),
+                Reader.approve(priceOfAllArticles),
+                Reader.firstDeposit(priceOfAllArticles),
+                Reader.order(articleId))
+            ;({order, sprites: {chId}} = reader)
         })
 
         describe('.invoice', () => {
@@ -144,7 +144,7 @@ describe('Publisher', () => {
             it('identifies the new desired channel-state', () => {
                 expect(invoice).toMatchObject({
                     chId,
-                    round: PWC.sprites.channel.round + 1
+                    round: reader.sprites.channel.round + 1
                 })
             })
 
@@ -177,8 +177,8 @@ describe('Publisher', () => {
                 let payment
 
                 beforeAll(async () => {
-                    ;({payment} = await threadP(PWC,
-                        PaywallClient.pay(invoice),
+                    ;({payment} = await threadP(reader,
+                        Reader.pay(invoice),
                         assocPath(['payment', 'sigs', 0], null)))
                 })
 
@@ -197,10 +197,10 @@ describe('Publisher', () => {
                 let payment
 
                 beforeAll(async () => {
-                    ;({payment} = await threadP(PWC,
-                        PaywallClient.pay(invoice),
+                    ;({payment} = await threadP(reader,
+                        Reader.pay(invoice),
                         updatePath(['payment', 'sigs'],
-                            ([pwc, pw]) => [pw, pw])))
+                            ([_reader, publisher]) => [publisher, publisher])))
                 })
 
                 it('is rejected', async () => {
@@ -224,10 +224,10 @@ describe('Publisher', () => {
                 beforeAll(async () => {
                     const pw0 = await Publisher.channel(chId, publisher)
                     startRound = pw0.sprites.channel.round
-                    ;({payment} = await PaywallClient.pay(invoice, PWC))
+                    ;({payment} = await Reader.pay(invoice, reader))
                     ;({paymentReceipt: receipt} =
                         await Publisher.processPayment(payment, publisher))
-                    await PaywallClient.processReceipt(receipt, PWC)
+                    await Reader.processReceipt(receipt, reader)
                 })
 
                 it('attaches the payment as reference', async () => {
@@ -269,11 +269,11 @@ describe('Publisher', () => {
             let receipt
 
             async function buy(articleId) {
-                const {order} = await PaywallClient.order(articleId, PWC)
+                const {order} = await Reader.order(articleId, reader)
                 const {invoice} = await Publisher.invoice(order, publisher)
-                const {payment} = await PaywallClient.pay(invoice, PWC)
+                const {payment} = await Reader.pay(invoice, reader)
                 const {paymentReceipt} = await Publisher.processPayment(payment, publisher)
-                return await PaywallClient.processReceipt(paymentReceipt, PWC)
+                return await Reader.processReceipt(paymentReceipt, reader)
             }
 
             beforeAll(async () => {

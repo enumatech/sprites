@@ -15,8 +15,8 @@
     "test": "jest --coverage",
     "deploy": "node ./deploy-demo.js | tee sprites-config.json",
     "publisher": "node ./publisher-server.js",
-    "reader": "beefy paywall-client-page.js --live --cwd public/ --debug=true",
-    "bundle": "browserify paywall-client-page.js -o public/paywall-client-page.js"
+    "reader": "beefy reader-page.js --live --cwd public/ --debug=true",
+    "bundle": "browserify reader-page.js -o public/reader-page.js"
   },
   "repository": {
     "type": "git",

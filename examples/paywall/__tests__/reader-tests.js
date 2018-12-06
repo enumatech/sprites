@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-// paywall-client-tests.js
+// reader-tests.js
 // Enuma Sprites PoC
 //
 // Copyright (c) 2018 Enuma Technologies Limited.
@@ -10,13 +10,13 @@ const {indexBy, prop, assoc, dissoc, keys} = require('ramda')
 const {thread, threadP} = require('sprites/lib/fp.js')
 const {ZERO_ADDR, makeProvider} = require('sprites/lib/test-helpers.js')
 const OffChainRegistry = require('sprites/lib/off-chain-registry.js')
-const PaywallClient = require('../paywall-client.js')
+const Reader = require('../reader.js')
 const Publisher = require('../publisher.js')
 const Sprites = require('sprites')
 const ChannelState = require('sprites/lib/channel-state.js')
 
-describe('PaywallClient', () => {
-    let publisher, PWC0, web3Provider
+describe('Reader', () => {
+    let publisher, reader0, web3Provider
     const Articles = [
         {
             id: "aId-1",
@@ -45,7 +45,7 @@ describe('PaywallClient', () => {
                 Sprites.withWeb3Contracts),
         })
 
-        PWC0 = PaywallClient.make({
+        reader0 = Reader.make({
             sprites: Sprites.withRemoteSigner(
                 Sprites.make({
                     web3Provider,
@@ -61,34 +61,34 @@ describe('PaywallClient', () => {
 
     describe('.make', () => {
         it('works without params', () => {
-            expect(() => PaywallClient.make()).not.toThrow()
+            expect(() => Reader.make()).not.toThrow()
         })
 
         it('defaults to in-memory library db', () => {
-            expect(PaywallClient.make().db).toMatchObject({
+            expect(Reader.make().db).toMatchObject({
                 read: expect.any(Function),
                 write: expect.any(Function)
             })
         })
 
         it('has a default sprites client', () => {
-            expect(PaywallClient.make()).toMatchObject({
+            expect(Reader.make()).toMatchObject({
                 sprites: expect.objectContaining(Sprites.make())
             })
         })
 
         it('merges its options parameter into the returned client', () => {
-            expect(PaywallClient.make({param: 1})).toMatchObject({param: 1})
+            expect(Reader.make({param: 1})).toMatchObject({param: 1})
         })
     })
 
     describe('.withPaywall', () => {
         it('works', async () => {
-            const paywallConfig = Publisher.config(publisher)
+            const publisherConfig = Publisher.config(publisher)
             const {
                 publisher: publisherAddr,
                 sprites: {preimageManager, reg, token}
-            } = await PaywallClient.withPaywall(paywallConfig, PWC0)
+            } = await Reader.withPaywall(publisherConfig, reader0)
 
             /**
              * Expect a web3.Contract object at the given address with
@@ -100,11 +100,11 @@ describe('PaywallClient', () => {
                 expect(contract[methodName]).toBeInstanceOf(Function)
             }
 
-            expect(publisherAddr).toEqual(paywallConfig.publisher)
+            expect(publisherAddr).toEqual(publisherConfig.publisher)
             expectContract(preimageManager,
-                paywallConfig.preimageManager, 'submitPreimage')
-            expectContract(reg, paywallConfig.reg, 'create')
-            expectContract(token, paywallConfig.token, 'transfer')
+                publisherConfig.preimageManager, 'submitPreimage')
+            expectContract(reg, publisherConfig.reg, 'create')
+            expectContract(token, publisherConfig.token, 'transfer')
         })
     })
 
@@ -112,25 +112,25 @@ describe('PaywallClient', () => {
         it('works', async () => {
             const paywallConfig = Publisher.config(publisher)
 
-            await expect(PaywallClient.validatePaywall(paywallConfig, PWC0))
+            await expect(Reader.validatePaywall(paywallConfig, reader0))
                 .resolves.toHaveLength(3)
 
-            await expect(PaywallClient.validatePaywall(dissoc('reg', paywallConfig), PWC0))
+            await expect(Reader.validatePaywall(dissoc('reg', paywallConfig), reader0))
                 .rejects.toThrowError(/No address .+"reg"/i)
 
-            await expect(PaywallClient.validatePaywall(assoc('reg', ZERO_ADDR, paywallConfig), PWC0))
+            await expect(Reader.validatePaywall(assoc('reg', ZERO_ADDR, paywallConfig), reader0))
                 .rejects.toThrowError(/No code .+"reg"/i)
 
-            await expect(PaywallClient.validatePaywall(dissoc('preimageManager', paywallConfig), PWC0))
+            await expect(Reader.validatePaywall(dissoc('preimageManager', paywallConfig), reader0))
                 .rejects.toThrowError(/No address .+"preimageManager"/i)
 
-            await expect(PaywallClient.validatePaywall(assoc('preimageManager', ZERO_ADDR, paywallConfig), PWC0))
+            await expect(Reader.validatePaywall(assoc('preimageManager', ZERO_ADDR, paywallConfig), reader0))
                 .rejects.toThrowError(/No code .+"preimageManager"/i)
 
-            await expect(PaywallClient.validatePaywall(dissoc('token', paywallConfig), PWC0))
+            await expect(Reader.validatePaywall(dissoc('token', paywallConfig), reader0))
                 .rejects.toThrowError(/No address .+"token"/i)
 
-            await expect(PaywallClient.validatePaywall(assoc('token', ZERO_ADDR, paywallConfig), PWC0))
+            await expect(Reader.validatePaywall(assoc('token', ZERO_ADDR, paywallConfig), reader0))
                 .rejects.toThrowError(/No code .+"token"/i)
         })
     })
@@ -140,35 +140,35 @@ describe('PaywallClient', () => {
 
         beforeAll(async () => {
             paywallConfig = Publisher.config(publisher)
-            connectedClient = await PaywallClient.withPaywall(paywallConfig, PWC0)
+            connectedClient = await Reader.withPaywall(paywallConfig, reader0)
         })
 
         describe('to buy an article from a publisher', () => {
-            let PWC, chId, article, articleId
+            let reader, chId, article, articleId
 
             beforeAll(async () => {
                 const catalog = await Publisher.catalog(publisher)
                 article = catalog[0]
                 articleId = article.id
-                PWC = await threadP(connectedClient,
-                    PaywallClient.approve(article.price),
-                    PaywallClient.firstDeposit(article.price))
-                ;({sprites: {chId}} = PWC)
+                reader = await threadP(connectedClient,
+                    Reader.approve(article.price),
+                    Reader.firstDeposit(article.price))
+                ;({sprites: {chId}} = reader)
             })
 
             describe('.withPaywall', () => {
                 it('restores the open channel', async () => {
                     const reconnectedClient =
-                        await PaywallClient.withPaywall(paywallConfig, PWC0)
+                        await Reader.withPaywall(paywallConfig, reader0)
 
                     expect(reconnectedClient.sprites.chId)
-                        .toEqual(PWC.sprites.chId)
+                        .toEqual(reader.sprites.chId)
                 })
             })
 
             describe('.library', () => {
                 it('is empty', async () => {
-                    const library = await PaywallClient.library(PWC)
+                    const library = await Reader.library(reader)
                     expect(keys(library)).toHaveLength(0)
                 })
             })
@@ -180,10 +180,10 @@ describe('PaywallClient', () => {
                         chId: "<chId>",
                         sig: ["v", "r", "s"]
                     }
-                    const lib = async () => PaywallClient.library(PWC)
+                    const lib = async () => Reader.library(reader)
                     expect(keys(await lib())).not.toContain(receipt.id)
 
-                    await PaywallClient.saveReceipt(receipt, PWC)
+                    await Reader.saveReceipt(receipt, reader)
 
                     expect(await lib())
                         .toMatchObject({[receipt.articleId]: receipt})
@@ -192,20 +192,20 @@ describe('PaywallClient', () => {
 
             describe('.order', () => {
                 it('contains channel ID as means to pay', async () => {
-                    const {order} = PaywallClient.order(articleId, PWC)
+                    const {order} = Reader.order(articleId, reader)
                     expect(order).toMatchObject({articleId, chId})
                 })
             })
 
             describe('.pay', () => {
-                let PWCpmt // PWC with payment
+                let readerPmt // reader with payment
                 let invoice, payment
 
                 beforeAll(async () => {
-                    const {order} = PaywallClient.order(articleId, PWC)
+                    const {order} = Reader.order(articleId, reader)
                     ;({invoice} = await Publisher.invoice(order, publisher))
-                    PWCpmt = await PaywallClient.pay(invoice, PWC)
-                    ;({payment} = PWCpmt)
+                    readerPmt = await Reader.pay(invoice, reader)
+                    ;({payment} = readerPmt)
                 })
 
                 it('looks like the invoice without our signature', () => {
@@ -213,7 +213,7 @@ describe('PaywallClient', () => {
                 })
 
                 it('is signed by us too', () => {
-                    const {channel} = PWCpmt.sprites
+                    const {channel} = readerPmt.sprites
                     expect(channel.sigs[0]).toBeDefined()
                     expect(channel.sigs[1]).toEqual(invoice.sigs[1])
                     expect(ChannelState.checkAvailSigs(channel)).toBe(true)
@@ -232,17 +232,18 @@ describe('PaywallClient', () => {
                 let paymentReceipt, receipt
 
                 beforeAll(async () => {
-                    const {order} = PaywallClient.order(articleId, PWC)
+                    const {order} = Reader.order(articleId, reader)
                     const {invoice} = await Publisher.invoice(order, publisher)
-                    const {payment} = await PaywallClient.pay(invoice, PWC)
+                    const {payment} = await Reader.pay(invoice, reader)
                     ;({paymentReceipt} =
                         await Publisher.processPayment(payment, publisher))
                     ;({receipt} =
-                        await PaywallClient.processReceipt(paymentReceipt, PWC))
+                        await Reader.processReceipt(paymentReceipt, reader))
                 })
 
                 it('saves the channel state', async () => {
-                    const {sprites: {channel}} = await PaywallClient.channel(chId, PWC)
+                    const {sprites: {channel}} =
+                        await Reader.channel(chId, reader)
                     expect(channel.round).toEqual(paymentReceipt.payment.round)
                 })
 
@@ -256,7 +257,7 @@ describe('PaywallClient', () => {
                 })
 
                 it('saves the receipt into the library', async () => {
-                    await expect(PaywallClient.library(PWC))
+                    await expect(Reader.library(reader))
                         .resolves.toMatchObject({[article.id]: receipt})
                 })
             })

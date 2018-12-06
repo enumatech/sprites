@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-// paywall-client-page.js
+// reader-page.js
 // Enuma Sprites PoC
 //
 // Copyright (c) 2018 Enuma Technologies Limited.
@@ -21,7 +21,7 @@ const LowStorage = require('lowdb/adapters/LocalStorage')
 const OffChainRegistry = require('sprites/lib/off-chain-registry.js')
 const Sign = require('sprites/lib/sign.js')
 const Sprites = require('sprites')
-const PaywallClient = require('./paywall-client.js')
+const Reader = require('./reader.js')
 const PublisherApiClient = require('./publisher-api-client.js')
 const dom = require('./dom.js')
 const {
@@ -38,40 +38,40 @@ const publisher = PublisherApiClient(publisherFetch)
  * App state
  * */
 let route = {view: 'loading'}
-let pwc, catalog, library, article
+let reader, catalog, library, article
 
 /**
  * Actions
  * */
 async function openChannel() {
     const amount = 30
-    pwc = await threadP(pwc,
-        PaywallClient.approve(amount),
-        PaywallClient.firstDeposit(amount))
+    reader = await threadP(reader,
+        Reader.approve(amount),
+        Reader.firstDeposit(amount))
     render()
 }
 
 async function buyArticle(id) {
-    pwc = PaywallClient.order(id, pwc)
-    const {order} = pwc
+    reader = Reader.order(id, reader)
+    const {order} = reader
     // console.log('order', order)
 
     const invoice = await publisher.invoice(order)
     // console.log('invoice', invoice)
 
-    pwc = await PaywallClient.pay(invoice, pwc)
-    const {payment} = pwc
+    reader = await Reader.pay(invoice, reader)
+    const {payment} = reader
     // console.log('payment', payment)
 
     const paymentReceipt = await publisher.processPayment(payment)
     // console.log('paymentReceipt', paymentReceipt)
 
-    pwc = await PaywallClient.processReceipt(paymentReceipt, pwc)
-    const {receipt} = pwc
+    reader = await Reader.processReceipt(paymentReceipt, reader)
+    const {receipt} = reader
     // console.log('receipt', receipt)
-    await PaywallClient.saveReceipt(receipt, pwc)
+    await Reader.saveReceipt(receipt, reader)
     // Just to update the debug panel
-    library = await PaywallClient.library(pwc)
+    library = await Reader.library(reader)
 
     await setRoute('article', {receipt})
     // console.log('article', article)
@@ -80,18 +80,18 @@ async function buyArticle(id) {
 }
 
 async function publisherWithdraw() {
-    const chId = pwc.sprites.chId
+    const chId = reader.sprites.chId
     const {withdrawn} = await publisher.publisherWithdraw(chId)
     console.log('withdrawn', withdrawn)
-    pwc = await PaywallClient.channel(chId, pwc)
+    reader = await Reader.channel(chId, reader)
     render()
 }
 
 async function readerWithdraw() {
-    const chId = pwc.sprites.chId
+    const chId = reader.sprites.chId
     const {withdrawn} = await publisher.readerWithdraw(chId)
     console.log('withdrawn', withdrawn)
-    pwc = await PaywallClient.channel(chId, pwc)
+    reader = await Reader.channel(chId, reader)
     render()
 }
 
@@ -124,7 +124,7 @@ const ArticleEntry = ({id, price, title, blurb}) => {
     const price$ = span({class: 'dai'}, `USD ${price}`)
 
     const receipt = library[id]
-    const cannotBuy = isNil(pwc.sprites.channel)
+    const cannotBuy = isNil(reader.sprites.channel)
     const haveReceipt = !isNil(receipt)
     const readOrBuy$ =
         (haveReceipt
@@ -144,7 +144,7 @@ const Catalog = ({catalog, library}) =>
     div(...map(article => ArticleEntry(article), catalog))
 
 const OpenChannel = () =>
-    isNil(pwc.sprites.channel)
+    isNil(reader.sprites.channel)
         ? button({onclick: () => openChannel()}, 'Open channel')
         : ''
 
@@ -152,9 +152,9 @@ const CatalogView = ({catalog, library}) => View(
     OpenChannel(),
     Catalog({catalog, library}))
 
-const Debug = ({pwc, library, route = {}}) => {
-    if (isNil(pwc)) return ''
-    const {sprites: {channel = {}}} = pwc
+const Debug = ({reader, library, route = {}}) => {
+    if (isNil(reader)) return ''
+    const {sprites: {channel = {}}} = reader
     const boringChannelFields = ['preimageHash', 'recipient', 'expiry', 'sigs']
 
     return div({class: 'debug'},
@@ -206,7 +206,7 @@ async function setRoute(view, params) {
 
         case 'catalog':
             catalog = await publisher.catalog()
-            library = await PaywallClient.library(pwc)
+            library = await Reader.library(reader)
             break
 
         case 'article':
@@ -223,7 +223,7 @@ async function setRoute(view, params) {
 function render() {
     dom.mount($('#app'), frag(
         Views(route),
-        Debug({pwc, library, route})))
+        Debug({reader, library, route})))
 }
 
 /**
@@ -245,9 +245,9 @@ async function start() {
 
     const publisherConfig = await publisher.config()
 
-    pwc = await PaywallClient.withPaywall(
+    reader = await Reader.withPaywall(
         publisherConfig,
-        PaywallClient.make({
+        Reader.make({
             db: low(new LowStorage(`library-${publisherConfig.reg}`)),
             sprites: Sprites.make({
                 web3Provider,
@@ -261,8 +261,8 @@ async function start() {
             })
         })
     )
-    // await PaywallClient.validatePaywall(publisherConfig, pwc)
-    console.info('Paywall client (pwc)', pwc)
+    // await Reader.validatePaywall(publisherConfig, reader)
+    console.info('Paywall client (reader)', reader)
 
     await setRoute('catalog')
 
@@ -274,15 +274,15 @@ async function start() {
 // to aid interactive explorations
 Object.assign(window, {
     ...NAMED_ACCOUNTS, // DEPLOYER, ALICE, BOB, EVE
-    util, Web3Eth, Web3EthContract, Sprites, PaywallClient,
+    util, Web3Eth, Web3EthContract, Sprites, Reader,
     publisher, setRoute, render
 })
 
 // Expose mutable app state dynamically
 Object.defineProperties(window, {
     route: {get: () => route},
-    pwc: {get: () => pwc},
-    s: {get: () => pwc.sprites},
+    reader: {get: () => reader},
+    s: {get: () => reader.sprites},
     catalog: {get: () => catalog},
     library: {get: () => library},
     article: {get: () => article}
