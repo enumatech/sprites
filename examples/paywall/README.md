@@ -23,7 +23,9 @@ The publishers still has to maintain the off-chain state of the channels
 they are involved in, so they can withdraw their funds and safely advance
 the channel state with the readers.
 
+Here is a sequence diagram for this process:
 
+![Invoicing workflow](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/enumatech/sprites/master/diagrams/invoice.puml&fmt=png)
 
 ## Install
 
