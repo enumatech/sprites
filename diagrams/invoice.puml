@@ -1,0 +1,45 @@
+@startuml
+title Invoicing workflow
+
+actor Alice as A
+database "Alice's\n**Off-chain**\nChannel DB" as dbA
+entity "Alice's\nmailbox" as mailA
+
+box "Blockchain" #lightblue
+    participant "Everyone's\n**On-chain**\nChannel registry" as reg
+    participant "Token" as token
+end box
+
+box "Internet" #beige
+    control "Postal service\neg. Whisper" as post
+end box
+
+entity "Bob's\nmailbox" as mailB
+database "Bob's\n**Off-chain**\nChannel DB" as dbB
+actor Bob as B
+
+A -> reg: create and deposit
+reg --> A: channel ID
+reg --> B: channel ID
+A -> B: Order something\n  (will pay via channel ID)
+
+B -> post: Invoice:\n    latest paid round + 1\n    request payment\n    allow withdrawal\n    sigB
+
+post -> mailA: Invoice
+mailA -> A: Review invoice\n  (cmd)
+
+group in any order?
+    A -> post: Payment: invoice by signing with sigA
+    A -> dbA: Save Payment
+end
+
+group in any order?
+    post -> mailB: Payment
+    dbA -> A: Payment saved
+end
+
+mailB -> B: Verify Payment
+B -> dbB: Save Payment
+dbB -> B: Payment Saved
+
+@enduml

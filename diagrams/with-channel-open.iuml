@@ -1,0 +1,75 @@
+@startuml
+actor Alice as A
+
+box "Blockchain" #lightblue
+    participant "Channel Registry" as reg
+    participant "Token" as token
+end box
+
+actor Bob as B
+
+note over token
+    **Balances**:
+      50 — Alice
+      80 — Bob
+      0 — Ch. Reg.
+end note
+
+note over reg
+    channel count: 0
+end note
+
+
+group Open channel
+    A -> reg: Open channel
+
+    note over reg
+        **chID:** 0
+        **Alice**
+          0 Deposit
+          0 Credit
+          0 Withdrawal
+        **Bob**
+          0 Deposit
+          0 Credit
+          0 Withdrawal
+    end note
+
+    reg -> reg: LogChannel(\n  ID: 0,\n  left: Alice,\n  right: Bob)
+
+    note over reg: channel count: 1
+
+    reg --> A: Channel ID: 0
+    reg --> B: Channel ID: 0
+end
+
+group Deposit
+    note over A
+        **Alice**
+          10 Deposit
+    end note
+
+    A -> reg: Deposit 10 WETH
+
+    note over reg
+        **Alice**
+          10 Deposit
+    end note
+
+    reg -> token: transferFrom(\n  Alice, itself, 10 WETH)
+
+    note over token
+        **Balances**:
+          40 — Alice
+          80 — Bob
+          10 — Ch. Reg.
+    end note
+
+    reg --> B: Deposit(Alice, chID: 0, 10)
+
+    note over B
+        **Alice**
+          10 Deposit
+    end note
+end
+@enduml

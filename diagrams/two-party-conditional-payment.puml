@@ -1,0 +1,32 @@
+@startuml
+title Two-party conditional payment [draft]
+
+!include ./with-channel-open.iuml
+
+group Conditional payment
+    A -> B: I want to pay maybe
+    B -> A: h = preimageHash
+    note over A
+        **Alice**
+          10 Deposit
+          0 Credit
+            Payment:
+              7 amount
+              h preimageHash
+              blk# + EXPIRY_DELTA expiry
+        **Bob**
+          0 Credit
+    end note
+
+    A -> B: send(7, over chID 1)
+
+    note over B
+        **Alice**
+          10 Deposit
+          -7 Credit
+        **Bob**
+          7 Credit
+    end note
+end
+...
+@enduml

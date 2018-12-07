@@ -1,0 +1,29 @@
+@startuml
+title Payment channel creation
+
+participant "Alice's off-chain\nchannel registry" as Areg
+actor Alice as A
+
+box "Blockchain" #lightblue
+    participant "On-chain\nchannel registry" as reg
+    participant "Token" as token
+end box
+
+actor Bob as B
+participant "Bob's off-chain\nchannel registry" as Breg
+
+A -> reg: create(Bob, Token)
+reg -> reg: generates chanID
+reg -> A: chanID
+A -> Areg: save chanID
+Areg -> A: ack save
+A -> B: notify about chanID
+B -> reg: getState(chanID)
+reg -> B: chan(chanID)
+alt chanID exists
+B -> Breg: save chanID
+Breg -> B: ack save
+else chanID doesn't exists
+    note over Breg: ignore
+end
+@enduml

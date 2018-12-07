@@ -1,0 +1,126 @@
+@startuml
+title Two-party unconditional payment
+
+!include ./with-channel-open.iuml
+
+group Transfer
+    note over A
+        **Alice**
+          10 Deposit
+          -7 Credit
+        **Bob**
+          7 Credit
+    end note
+
+    A -> B: send(7, over chID 1)
+
+    note over B
+        **Alice**
+          10 Deposit
+          -7 Credit
+        **Bob**
+          7 Credit
+    end note
+end
+
+alt Cooperative withdrawal by Alice
+
+    note right A: Balance = Deposit + Credit - Withdraw
+
+    note over A
+        **Alice**
+          -7 Credit
+          3 Withdrawal
+        **Bob**
+          7 Credit
+          7 Withdrawal
+    end note
+
+    A -> B: send signed channel state from Alice's perspective
+    B -> A: send signed channel state from Bob's perspective
+    A -> reg: update(channel)
+
+    note over reg
+        **Alice**
+          10 Deposit
+          -7 Credit
+          3 Withdrawal
+        **Bob**
+          0 Deposit
+          7 Credit
+          7 Withdrawal
+    end note
+
+
+    A -> reg: Withdraw
+    reg -> token: transfer 3 WETH to Alice
+    note over token
+        **Balances**:
+          43 — Alice
+          80 — Bob
+          7 — Ch. Reg.
+    end note
+
+    B -> reg: Withdraw
+    reg -> token: transfer 7 WETH to Bob
+
+    note over token
+        **Balances**:
+          43 — Alice
+          87 — Bob
+          0 — Ch. Reg.
+    end note
+
+else Non-cooperative withdrawal by Alice
+
+    note right A: Balance = Deposit + Credit - Withdraw
+
+    note over A
+        **Alice**
+          -7 Credit
+          3 Withdrawal
+        **Bob**
+          7 Credit
+          7 Withdrawal
+    end note
+
+    A -> B: send signed channel state from Alice's perspective
+    B --X A: Bob doesn't respond
+    A -> reg: update(channel)
+
+    note over reg
+        **Alice**
+          10 Deposit
+          -7 Credit
+          3 Withdrawal
+        **Bob**
+          0 Deposit
+          7 Credit
+          7 Withdrawal
+    end note
+
+    A -> reg: trigger dispute
+
+    ... wait for dispute time elapse ...
+
+    A -> reg: Withdraw
+    reg -> token: transfer 3 WETH to Alice
+    note over token
+        **Balances**:
+          43 — Alice
+          80 — Bob
+          7 — Ch. Reg.
+    end note
+
+    B -> reg: Withdraw
+    reg -> token: transfer 7 WETH to Bob
+
+    note over token
+        **Balances**:
+          43 — Alice
+          87 — Bob
+          0 — Ch. Reg.
+    end note
+end
+
+@enduml
