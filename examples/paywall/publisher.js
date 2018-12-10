@@ -138,10 +138,14 @@ const Publisher = {
         const {sprites} = publisher
         assert(Sign.by(sprites.ownAddress, receiptHash, sig),
             `Invalid signture on receipt:\n` + inspect(receipt))
+        // This might be async, hence the whole function is async
         const article = publisher.db[articleId]
         return {...publisher, article}
     }),
 
+    /**
+     * Withdraws accumulated payments to the blockchain.
+     * */
     publisherWithdraw: curry(async (chId, publisher) => {
         const spritesBefore = await threadP(
             publisher,
@@ -161,7 +165,29 @@ const Publisher = {
         return {...publisher, sprites: spritesAfter, withdrawn}
     }),
 
-    readerWithdraw: curry(async (chId, publisher) => {
+    /**
+     * Agrees that the reader can withdraw their remaining
+     * deposit from the channel onto the blockchain.
+     * */
+    readerWithdraw: curry(async (withdrawalRequest, publisher) => {
+        const {chId, cmd, sigs} = withdrawalRequest
+        const sprites = await threadP(publisher.sprites,
+            assoc('chId', chId),
+            Sprites.channelState,
+            assoc('cmd', cmd),
+            Sprites.cmd.apply,
+            assocPath(['channel', 'sigs'], sigs))
+
+        assert(ChannelState.checkAvailSigs(sprites.channel),
+            `Invalid signatures in withdrawalRequest:\n`
+            + inspect(withdrawalRequest) + '\n'
+            + 'in channel:\n'
+            + inspect(sprites.channel))
+
+        // const signedSprite = await Sprites.sign(sprite)
+        await Sprites.save(sprites)
+        const withdrawal = withdrawalRequest
+        return {...publisher, withdrawal}
     }),
 
     channel: curry(async (chId, publisher) => {

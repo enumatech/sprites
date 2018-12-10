@@ -200,6 +200,19 @@ const Reader = {
         const {payment, ...receipt} = paymentReceipt
         await Reader.saveReceipt(receipt, rdr)
         return {...rdr, sprites, receipt}
+    }),
+
+    requestWithdraw: curry(async (rdr) => {
+        const sprites0 = await Sprites.channelState(rdr.sprites)
+        const ownIdx = Sprites.ownIdx(sprites0)
+        const balance = ChannelState.balance(ownIdx, sprites0.channel)
+        const sprites = await threadP(
+            sprites0,
+            Sprites.cmd.withdraw(balance),
+            Sprites.sign)
+        const {chId, cmd, channel: {round, sigs}} = sprites
+        const withdrawalRequest = {chId, cmd, round, sigs}
+        return {...rdr, sprites, withdrawalRequest}
     })
 }
 

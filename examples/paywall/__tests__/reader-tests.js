@@ -211,9 +211,8 @@ describe('Reader', () => {
                     ;({payment} = readerPmt)
                 })
 
-                it('looks like the invoice without our signature', () => {
-                    expect(payment).toMatchObject(dissoc('sigs', invoice))
-                })
+                it('looks like the invoice without our signature', () =>
+                    expect(payment).toMatchObject(dissoc('sigs', invoice)))
 
                 it('is signed by us too', () => {
                     const {channel} = readerPmt.sprites
@@ -221,9 +220,6 @@ describe('Reader', () => {
                     expect(channel.sigs[1]).toEqual(invoice.sigs[1])
                     expect(ChannelState.checkAvailSigs(channel)).toBe(true)
                     expect(payment.sigs).toEqual(channel.sigs)
-                })
-
-                it.skip('is idempotent', async () => {
                 })
             })
 
@@ -255,13 +251,55 @@ describe('Reader', () => {
                     expect(receipt).toMatchObject({articleId, chId, sig})
                 })
 
-                it('strips the verified payment', async () => {
-                    expect(receipt).not.toHaveProperty('payment')
+                it('strips the verified payment', () =>
+                    expect(receipt).not.toHaveProperty('payment'))
+
+                it('saves the receipt into the library', () =>
+                    expect(Reader.library(reader)).resolves
+                        .toMatchObject({[article.id]: receipt}))
+            })
+
+            describe('.requestWithdraw', () => {
+                let reader, chId, withdrawalRequest
+                const deposit = 12
+
+                beforeAll(async () => {
+                    reader = await threadP(connectedClient,
+                        Reader.approve(deposit),
+                        Reader.firstDeposit(deposit),
+                        Reader.requestWithdraw)
+                    ;({withdrawalRequest, sprites:{chId}} = reader)
                 })
 
-                it('saves the receipt into the library', async () => {
-                    await expect(Reader.library(reader))
-                        .resolves.toMatchObject({[article.id]: receipt})
+                it('describes the channel-state transition operation', () =>
+                    expect(withdrawalRequest).toMatchObject({
+                        cmd: {
+                            name: 'withdraw',
+                            params: [
+                                Sprites.ownIdx(reader.sprites),
+                                deposit
+                            ]
+                        }
+                    }))
+
+                it('identifies the new desired channel-state', () =>
+                    expect(withdrawalRequest).toMatchObject({
+                        chId,
+                        round: 0
+                    }))
+
+                it('signs the target channel-state', () => {
+                    const {sprites} = reader
+                    const {channel} = sprites
+
+                    expect(channel.sigs[Sprites.ownIdx(sprites)])
+                        .toBeDefined()
+
+                    expect(channel.sigs[Sprites.otherIdx(sprites)])
+                        .not.toBeDefined()
+
+                    expect(ChannelState.checkAvailSigs(channel)).toBe(true)
+                    expect(withdrawalRequest.sigs).toEqual(channel.sigs)
                 })
             })
         })

@@ -120,36 +120,36 @@ describe('Publisher', () => {
         })
 
         describe('.invoice', () => {
-            let PWinv // PW with invoice
+            let publisherInv // publisher with invoice
             let invoice // the invoice itself for convenience
 
             beforeAll(async () => {
-                PWinv = await Publisher.invoice(order, publisher)
-                ;({invoice} = PWinv)
+                publisherInv = await Publisher.invoice(order, publisher)
+                ;({invoice} = publisherInv)
             })
 
-            it('refers to the ordered article', () => {
-                expect(invoice).toMatchObject({articleId})
-            })
+            it('refers to the ordered article', () =>
+                expect(invoice).toMatchObject({articleId}))
 
-            it('describes the channel-state transition operation', () => {
+            it('describes the channel-state transition operation', () =>
                 expect(invoice).toMatchObject({
                     cmd: {
                         name: 'creditAndWithdraw',
-                        params: [Sprites.ownIdx(PWinv.sprites), article.price]
+                        params: [
+                            Sprites.ownIdx(publisherInv.sprites),
+                            article.price
+                        ]
                     }
-                })
-            })
+                }))
 
-            it('identifies the new desired channel-state', () => {
+            it('identifies the new desired channel-state', () =>
                 expect(invoice).toMatchObject({
                     chId,
                     round: reader.sprites.channel.round + 1
-                })
-            })
+                }))
 
             it('signs the target channel-state', () => {
-                const {channel} = PWinv.sprites
+                const {channel} = publisherInv.sprites
                 expect(channel.sigs[0]).not.toBeDefined()
                 expect(channel.sigs[1]).toBeDefined()
                 expect(ChannelState.checkAvailSigs(channel)).toBe(true)
@@ -159,10 +159,9 @@ describe('Publisher', () => {
                 expect(invoice.sigs).toEqual(channel.sigs)
             })
 
-            it('transfers the aritcle price to the publisher', () => {
-                expect(PWinv.sprites.channel.credits)
-                    .toEqual([-article.price, article.price])
-            })
+            it('transfers the aritcle price to the publisher', () =>
+                expect(publisherInv.sprites.channel.credits)
+                    .toEqual([-article.price, article.price]))
         })
 
         describe('.processPayment', () => {
@@ -176,32 +175,28 @@ describe('Publisher', () => {
             describe('without a signature', () => {
                 let payment
 
-                beforeAll(async () => {
-                    ;({payment} = await threadP(reader,
+                beforeAll(async () => (
+                    {payment} = await threadP(reader,
                         Reader.pay(invoice),
-                        assocPath(['payment', 'sigs', 0], null)))
-                })
+                        assocPath(['payment', 'sigs', 0], null))))
 
-                it('is rejected', async () => {
-                    await expect(Publisher.processPayment(payment, publisher))
-                        .rejects.toThrowError(/missing/i)
-                })
+                it('is rejected', () =>
+                    expect(Publisher.processPayment(payment, publisher))
+                        .rejects.toThrowError(/missing/i))
 
-                it('retains the channel balance', async () => {
-                    await expect(Publisher.balance(chId, publisher))
-                        .resolves.toEqual(balanceBeforePayment)
-                })
+                it('retains the channel balance', () =>
+                    expect(Publisher.balance(chId, publisher))
+                        .resolves.toEqual(balanceBeforePayment))
             })
 
             describe('with invalid signature', () => {
                 let payment
 
-                beforeAll(async () => {
-                    ;({payment} = await threadP(reader,
+                beforeAll(async () => (
+                    {payment} = await threadP(reader,
                         Reader.pay(invoice),
                         updatePath(['payment', 'sigs'],
-                            ([_reader, publisher]) => [publisher, publisher])))
-                })
+                            ([_reader, publisher]) => [publisher, publisher]))))
 
                 it('is rejected', async () => {
                     await expect(Publisher.processPayment(payment, publisher))
@@ -272,13 +267,12 @@ describe('Publisher', () => {
                 const {order} = await Reader.order(articleId, reader)
                 const {invoice} = await Publisher.invoice(order, publisher)
                 const {payment} = await Reader.pay(invoice, reader)
-                const {paymentReceipt} = await Publisher.processPayment(payment, publisher)
+                const {paymentReceipt} =
+                    await Publisher.processPayment(payment, publisher)
                 return await Reader.processReceipt(paymentReceipt, reader)
             }
 
-            beforeAll(async () => {
-                ;({receipt} = await buy(article1.id))
-            })
+            beforeAll(async () => ({receipt} = await buy(article1.id)))
 
             it('requires a valid signature', async () => {
                 const otherReceipt = update('chId', inc, receipt)
@@ -290,20 +284,16 @@ describe('Publisher', () => {
                     .rejects.toThrowError(/Invalid signture/i)
             })
 
-            it('returns the article', async () => {
-                await expect(Publisher.getArticle(receipt, publisher))
-                    .resolves.toMatchObject({article: article1})
-            })
+            it('returns the article', () =>
+                expect(Publisher.getArticle(receipt, publisher))
+                    .resolves.toMatchObject({article: article1}))
 
             describe('after buying another article', () => {
-                beforeAll(async () => {
-                    await buy(article2.id)
-                })
+                beforeAll(() => buy(article2.id))
 
-                it('still returns the first article', async () => {
-                    await expect(Publisher.getArticle(receipt, publisher))
-                        .resolves.toMatchObject({article: article1})
-                })
+                it('still returns the first article', () =>
+                    expect(Publisher.getArticle(receipt, publisher))
+                        .resolves.toMatchObject({article: article1}))
 
                 describe('.publisherWithdraw', () => {
                     it('withdraws all payments', async () => {
@@ -314,19 +304,39 @@ describe('Publisher', () => {
                             withdrawals[ownIdx] - withdrawn[ownIdx]
                         // Ensure we have something to withdraw
                         expect(expectToWithdraw).toBeGreaterThan(0)
-                        const {tokenBalance: balanceBefore} =
-                            await Sprites.tokenBalance(sprites)
+                        const balanceBefore =
+                            (await Sprites.tokenBalance(sprites)).tokenBalance
 
                         await expect(Publisher.publisherWithdraw(chId, publisher))
                             .resolves.toMatchObject({
                                 withdrawn: expectToWithdraw
                             })
 
-                        const {tokenBalance: balanceAfter} =
-                            await Sprites.tokenBalance(sprites)
+                        const balanceAfter =
+                            (await Sprites.tokenBalance(sprites)).tokenBalance
 
                         expect(balanceAfter - balanceBefore)
                             .toEqual(expectToWithdraw)
+                    })
+                })
+
+                describe.skip('.readerWithdraw', () => {
+                    let sprites, withdrawal
+
+                    beforeAll(async () => {
+                        const {withdrawalRequest} =
+                            await Reader.requestWithdraw(reader)
+
+                        ;({sprites, withdrawal} =
+                            await Publisher.readerWithdraw(
+                                withdrawalRequest,
+                                publisher))
+                    })
+
+                    it('is signed by the publisher', async () => {
+                        expect(withdrawal).toHaveProperty('sigs')
+                        expect(withdrawal.sigs[Sprites.ownIdx(sprites)])
+                            .toBeDefined()
                     })
                 })
             })

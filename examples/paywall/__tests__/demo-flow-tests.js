@@ -63,7 +63,7 @@ describe('Sprites paywall demo flow using APIs directly', () => {
 
     afterAll(() => web3Provider.connection.destroy())
 
-    describe('1st article', function () {
+    describe('1st article', () => {
         let reader, chId, article, content,
             publisherOpeningBalance,
             readerOpeningBalance
@@ -105,10 +105,9 @@ describe('Sprites paywall demo flow using APIs directly', () => {
             it('is readable', () =>
                 expect(paidArticle).toMatchObject({content}))
 
-            it('is saved in the Reader\'s library', async () => {
-                const library = await Reader.library(reader)
-                expect(library).toMatchObject({[article.id]: receipt})
-            })
+            it('is saved in the Reader\'s library', () =>
+                expect(Reader.library(reader)).resolves
+                    .toMatchObject({[article.id]: receipt}))
 
             describe('when the Publisher withdraws', () => {
                 beforeAll(() => Publisher.publisherWithdraw(chId, publisher))
@@ -117,10 +116,16 @@ describe('Sprites paywall demo flow using APIs directly', () => {
                     expect(balance(publisher)).resolves
                         .toEqual(publisherOpeningBalance + article.price))
 
-                describe('and the Reader withdraws too', () => {
-                    beforeAll(() => Publisher.readerWithdraw(chId, publisher))
+                describe.skip('and the Reader withdraws too', () => {
+                    beforeAll(async () => {
+                        const {withdrawalRequest} =
+                            await Reader.requestWithdraw(reader)
+                        const {withdrawal} =
+                            await Publisher.readerWithdraw(withdrawalRequest, publisher)
+                        // await Reader.withdraw(withdrawal, reader)
+                    })
 
-                    it.skip('their on-chain balance reflects the payment', () =>
+                    it('their on-chain balance reflects the payment', () =>
                         expect(balance(reader)).resolves
                             .toEqual(readerOpeningBalance - article.price))
                 })

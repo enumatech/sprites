@@ -64,8 +64,7 @@ You should see this huge ETH balance going beyond the Metamask plugin
 dialog box, for _Account 1_ (`0xd124b...`), which is the Deployer account.
 
 Create Alice, Bob and Eve accounts with the _Create Account_ menu,
-which generates them deterministically from the mnemonic sentence,
-aka seed phrase.
+which generates them deterministically from the mnemonic sentence.
 
 
 
