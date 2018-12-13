@@ -120,26 +120,21 @@ describe('Publisher', () => {
         })
 
         describe('.invoice', () => {
-            let publisherInv // publisher with invoice
-            let invoice // the invoice itself for convenience
+            let invoice, sprites
 
-            beforeAll(async () => {
-                publisherInv = await Publisher.invoice(order, publisher)
-                ;({invoice} = publisherInv)
-            })
+            beforeAll(async () =>
+                ({invoice, sprites} =
+                    await Publisher.invoice(order, publisher)))
 
             it('refers to the ordered article', () =>
                 expect(invoice).toMatchObject({articleId}))
 
             it('describes the channel-state transition operation', () =>
                 expect(invoice).toMatchObject({
-                    cmd: {
-                        name: 'creditAndWithdraw',
-                        params: [
-                            Sprites.ownIdx(publisherInv.sprites),
-                            article.price
-                        ]
-                    }
+                    xforms: [
+                        ['credit', Sprites.ownIdx(sprites), article.price],
+                        ['withdraw', Sprites.ownIdx(sprites), article.price]
+                    ]
                 }))
 
             it('identifies the new desired channel-state', () =>
@@ -149,7 +144,7 @@ describe('Publisher', () => {
                 }))
 
             it('signs the target channel-state', () => {
-                const {channel} = publisherInv.sprites
+                const {channel} = sprites
                 expect(channel.sigs[0]).not.toBeDefined()
                 expect(channel.sigs[1]).toBeDefined()
                 expect(ChannelState.checkAvailSigs(channel)).toBe(true)
@@ -160,7 +155,7 @@ describe('Publisher', () => {
             })
 
             it('transfers the aritcle price to the publisher', () =>
-                expect(publisherInv.sprites.channel.credits)
+                expect(sprites.channel.credits)
                     .toEqual([-article.price, article.price]))
         })
 
@@ -320,7 +315,7 @@ describe('Publisher', () => {
                     })
                 })
 
-                describe.skip('.readerWithdraw', () => {
+                describe('.readerWithdraw', () => {
                     let sprites, withdrawal
 
                     beforeAll(async () => {
@@ -334,7 +329,8 @@ describe('Publisher', () => {
                     })
 
                     it('is signed by the publisher', async () => {
-                        expect(withdrawal).toHaveProperty('sigs')
+                        expect(withdrawal).toHaveProperty(
+                            'sigs', expect.not.arrayContaining([undefined]))
                         expect(withdrawal.sigs[Sprites.ownIdx(sprites)])
                             .toBeDefined()
                     })

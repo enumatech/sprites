@@ -9,7 +9,7 @@
 const {
     isNil, curry, assoc, assocPath, project, values, prop
 } = require('ramda')
-const {thread, threadP} = require('sprites/lib/fp.js')
+const {update, thread, threadP} = require('sprites/lib/fp.js')
 const assert = require('assert')
 const {inspect} = require('util')
 const {
@@ -67,16 +67,31 @@ const Publisher = {
         const {price} = article
         assert(price, `Missing price for article id: ${articleId}`)
 
-        const sprites = await threadP({...publisher.sprites, chId},
-            Sprites.channelState,
-            Sprites.cmd.invoice(price),
+        const spritesBefore =
+            await Sprites.channelState({...publisher.sprites, chId})
+
+        // FIXME deprecate
+        const {cmd} = Sprites.cmd.invoice(price, spritesBefore)
+
+        const ownIdx = Sprites.ownIdx(spritesBefore)
+        const xforms = [
+            ['credit', ownIdx, price],
+            ['withdraw', ownIdx, price]]
+
+        const sprites = await threadP(
+            spritesBefore,
+            update('channel', ChannelState.transition(xforms)),
             Sprites.sign)
-        const {cmd, channel: {round, sigs}} = sprites
+        const {round, sigs} = sprites.channel
 
         return {
             ...publisher,
             sprites,
-            invoice: {articleId, price, cmd, chId, round, sigs}
+            invoice: {
+                articleId, price,
+                cmd /* FIXME deprecate in favor of xforms*/,
+                xforms, chId, round, sigs
+            }
         }
     }),
 
