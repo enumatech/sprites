@@ -116,7 +116,7 @@ describe('Sprites paywall demo flow using APIs directly', () => {
                     expect(balance(publisher)).resolves
                         .toEqual(publisherOpeningBalance + article.price))
 
-                describe.skip('and the Reader withdraws too', () => {
+                describe('and the Reader withdraws too', () => {
                     beforeAll(async () => {
                         const {withdrawalRequest} =
                             await Reader.requestWithdraw(reader)
@@ -125,7 +125,7 @@ describe('Sprites paywall demo flow using APIs directly', () => {
                         // await Reader.withdraw(withdrawal, reader)
                     })
 
-                    it('their on-chain balance reflects the payment', () =>
+                    it.skip('their on-chain balance reflects the payment', () =>
                         expect(balance(reader)).resolves
                             .toEqual(readerOpeningBalance - article.price))
                 })

@@ -199,10 +199,13 @@ const Publisher = {
             + 'in channel:\n'
             + inspect(sprites.channel))
 
-        // const signedSprite = await Sprites.sign(sprite)
-        await Sprites.save(sprites)
-        const withdrawal = withdrawalRequest
-        return {...publisher, withdrawal}
+        const signedSprites = await Sprites.sign(sprites)
+        await Sprites.save(signedSprites)
+        const withdrawal = {
+            ...withdrawalRequest,
+            sigs: signedSprites.channel.sigs
+        }
+        return {...publisher, sprites: signedSprites, withdrawal}
     }),
 
     channel: curry(async (chId, publisher) => {
