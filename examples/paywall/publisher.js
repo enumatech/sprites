@@ -80,7 +80,7 @@ const Publisher = {
 
         const sprites = await threadP(
             spritesBefore,
-            update('channel', ChannelState.transition(xforms)),
+            Sprites.transition(xforms),
             Sprites.sign)
         const {round, sigs} = sprites.channel
 
