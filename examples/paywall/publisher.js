@@ -70,9 +70,6 @@ const Publisher = {
         const spritesBefore =
             await Sprites.channelState({...publisher.sprites, chId})
 
-        // FIXME deprecate
-        const {cmd} = Sprites.cmd.invoice(price, spritesBefore)
-
         const ownIdx = Sprites.ownIdx(spritesBefore)
         const xforms = [
             ['credit', ownIdx, price],
@@ -87,11 +84,7 @@ const Publisher = {
         return {
             ...publisher,
             sprites,
-            invoice: {
-                articleId, price,
-                cmd /* FIXME deprecate in favor of xforms*/,
-                xforms, chId, round, sigs
-            }
+            invoice: {articleId, price, xforms, chId, round, sigs}
         }
     }),
 
@@ -119,7 +112,7 @@ const Publisher = {
     }),
 
     processPayment: curry(async (payment, publisher) => {
-        const {articleId, chId, cmd, sigs} = payment
+        const {articleId, chId, xforms, sigs} = payment
         const [buyerSig, _sellerSig] = sigs
         assert(buyerSig,
             `Signature missing from payment:\n` + inspect(payment))
@@ -127,8 +120,7 @@ const Publisher = {
         const sprites = await threadP(publisher.sprites,
             assoc('chId', chId),
             Sprites.channelState,
-            assoc('cmd', cmd),
-            Sprites.cmd.apply,
+            Sprites.transition(xforms),
             assocPath(['channel', 'sigs'], sigs))
 
         assert(ChannelState.checkAvailSigs(sprites.channel),
@@ -185,12 +177,11 @@ const Publisher = {
      * deposit from the channel onto the blockchain.
      * */
     readerWithdraw: curry(async (withdrawalRequest, publisher) => {
-        const {chId, cmd, sigs} = withdrawalRequest
+        const {chId, xforms, sigs} = withdrawalRequest
         const sprites = await threadP(publisher.sprites,
             assoc('chId', chId),
             Sprites.channelState,
-            assoc('cmd', cmd),
-            Sprites.cmd.apply,
+            Sprites.transition(xforms),
             assocPath(['channel', 'sigs'], sigs))
 
         assert(ChannelState.checkAvailSigs(sprites.channel),

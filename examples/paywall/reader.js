@@ -134,7 +134,7 @@ const Reader = {
      * Returns a `{payment}` suitable for `Paywall.processPayment`.
      * */
     pay: curry(async (invoice, rdr) => {
-        const {cmd, chId, round, sigs} = invoice
+        const {xforms, chId, round, sigs} = invoice
         const [_buyerSig, sellerSig] = sigs
 
         assert(sellerSig,
@@ -143,8 +143,7 @@ const Reader = {
         const sprite = await threadP(rdr.sprites,
             assoc('chId', chId),
             Sprites.channelState,
-            assoc('cmd', cmd),
-            Sprites.cmd.apply,
+            Sprites.transition(xforms),
             assocPath(['channel', 'sigs'], sigs))
 
         assert(sprite.channel.round === round,
@@ -168,7 +167,7 @@ const Reader = {
     }),
 
     processReceipt: curry(async (paymentReceipt, rdr) => {
-        const {cmd, chId, round, sigs} = paymentReceipt.payment
+        const {xforms, chId, round, sigs} = paymentReceipt.payment
         const [buyerSig, sellerSig] = sigs
 
         assert(sellerSig,
@@ -182,8 +181,7 @@ const Reader = {
         const sprites = await threadP(rdr.sprites,
             assoc('chId', chId),
             Sprites.channelState,
-            assoc('cmd', cmd),
-            Sprites.cmd.apply,
+            Sprites.transition(xforms),
             assocPath(['channel', 'sigs'], sigs))
 
         assert(sprites.channel.round === round,
@@ -206,12 +204,13 @@ const Reader = {
         const sprites0 = await Sprites.channelState(rdr.sprites)
         const ownIdx = Sprites.ownIdx(sprites0)
         const balance = ChannelState.balance(ownIdx, sprites0.channel)
+        const xforms = [['withdraw', ownIdx, balance]]
         const sprites = await threadP(
             sprites0,
-            Sprites.cmd.withdraw(balance),
+            Sprites.transition(xforms),
             Sprites.sign)
-        const {chId, cmd, channel: {round, sigs}} = sprites
-        const withdrawalRequest = {chId, cmd, round, sigs}
+        const {chId, channel: {round, sigs}} = sprites
+        const withdrawalRequest = {chId, xforms, round, sigs}
         return {...rdr, sprites, withdrawalRequest}
     })
 }

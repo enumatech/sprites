@@ -268,18 +268,14 @@ describe('Reader', () => {
                         Reader.approve(deposit),
                         Reader.firstDeposit(deposit),
                         Reader.requestWithdraw)
-                    ;({withdrawalRequest, sprites:{chId}} = reader)
+                    ;({withdrawalRequest, sprites: {chId}} = reader)
                 })
 
                 it('describes the channel-state transition operation', () =>
                     expect(withdrawalRequest).toMatchObject({
-                        cmd: {
-                            name: 'withdraw',
-                            params: [
-                                Sprites.ownIdx(reader.sprites),
-                                deposit
-                            ]
-                        }
+                        xforms: [
+                            ['withdraw', Sprites.ownIdx(reader.sprites), deposit]
+                        ]
                     }))
 
                 it('identifies the new desired channel-state', () =>
