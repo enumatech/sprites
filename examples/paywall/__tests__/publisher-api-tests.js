@@ -90,6 +90,21 @@ describe('PublisherApi', () => {
         })
     })
 
+    describe('/reader-withdraw', () => {
+        it('works', async () => {
+            const withdrawalRequest = {mock: '<withdrawalRequest>'}
+            const mockWithdrawal = {mock: '<mock withdrawal>'}
+            mock(Publisher.readerWithdraw,
+                resolve({withdrawal: mockWithdrawal}))
+
+            await expect(api.readerWithdraw(withdrawalRequest))
+                .resolves.toMatchObject(mockWithdrawal)
+
+            expect(Publisher.readerWithdraw)
+                .toBeCalledWith(withdrawalRequest, publisher)
+        })
+    })
+
     describe('/publisher-withdraw', () => {
         it('works', async () => {
             const chId = 123

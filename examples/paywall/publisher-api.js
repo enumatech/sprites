@@ -44,6 +44,12 @@ function PublisherApi(publisher, router) {
         res.json(article)
     })
 
+    router.postAsync('/reader-withdraw', async ({body: withdrawalRequest}, res) => {
+        const {withdrawal} =
+            await Publisher.readerWithdraw(withdrawalRequest, publisher)
+        res.json(withdrawal)
+    })
+
     // Demo endpoints.
     // They shouldn't exist in a real deployment without authorization!
     router.postAsync('/publisher-withdraw', async ({body: {chId}}, res) => {

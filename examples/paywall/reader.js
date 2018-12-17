@@ -200,6 +200,12 @@ const Reader = {
         return {...rdr, sprites, receipt}
     }),
 
+    /**
+     * Request withdrawal of the current off-chain channel balance.
+     *
+     * @param reader
+     * @return {{withdrawalRequest}}
+     * */
     requestWithdraw: curry(async (rdr) => {
         const sprites0 = await Sprites.channelState(rdr.sprites)
         const ownIdx = Sprites.ownIdx(sprites0)

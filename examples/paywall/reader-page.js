@@ -89,7 +89,8 @@ async function publisherWithdraw() {
 
 async function readerWithdraw() {
     const chId = reader.sprites.chId
-    const {withdrawn} = await publisher.readerWithdraw(chId)
+    const {withdrawalRequest} = await Reader.requestWithdraw(reader)
+    const {withdrawn} = await publisher.readerWithdraw(withdrawalRequest)
     console.log('withdrawn', withdrawn)
     reader = await Reader.channel(chId, reader)
     render()

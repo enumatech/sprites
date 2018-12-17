@@ -173,8 +173,8 @@ const Publisher = {
     }),
 
     /**
-     * Agrees that the reader can withdraw their remaining
-     * deposit from the channel onto the blockchain.
+     * Publisher agrees that the reader can withdraw their off-chain balance
+     * to the blockchain.
      * */
     readerWithdraw: curry(async (withdrawalRequest, publisher) => {
         const {chId, xforms, sigs} = withdrawalRequest
