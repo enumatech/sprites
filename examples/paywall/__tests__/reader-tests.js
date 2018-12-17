@@ -297,6 +297,43 @@ describe('Reader', () => {
                     expect(ChannelState.checkAvailSigs(channel)).toBe(true)
                     expect(withdrawalRequest.sigs).toEqual(channel.sigs)
                 })
+
+                describe('.withdraw', () => {
+                    let reader1, initialTokenBalance, initialChannelBalance
+
+                    beforeAll(async () => {
+                        const {sprites} = reader
+                        initialTokenBalance =
+                            (await Sprites.tokenBalance(sprites)).tokenBalance
+                        initialChannelBalance =
+                            await ChannelState.balance(
+                                Sprites.ownIdx(sprites),
+                                sprites.channel)
+                        const {withdrawal} =
+                            await Publisher.readerWithdraw(
+                                withdrawalRequest, publisher)
+                        reader1 = await Reader.withdraw(withdrawal, reader)
+                    })
+
+                    it('increases the reader\'s token balance', () =>
+                        expect(Sprites.tokenBalance(reader1.sprites)).resolves
+                            .toMatchObject({
+                                tokenBalance:
+                                    initialTokenBalance + initialChannelBalance
+                            }))
+
+                    it('updates the chain successfully', () =>
+                        expect(reader1.sprites.tx)
+                            .toMatchObject({status: true}))
+
+                    it('is reflected in the channel-state', () =>
+                        expect(Sprites.channelState(reader1.sprites)).resolves
+                            .toMatchObject({
+                                channel: {
+                                    withdrawn: [initialChannelBalance, 0]
+                                }
+                            }))
+                })
             })
         })
     })

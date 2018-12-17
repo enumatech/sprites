@@ -121,7 +121,7 @@ const Publisher = {
             assoc('chId', chId),
             Sprites.channelState,
             Sprites.transition(xforms),
-            assocPath(['channel', 'sigs'], sigs))
+            Sprites.withSigs(sigs))
 
         assert(ChannelState.checkAvailSigs(sprites.channel),
             `Invalid signatures in payment:\n`
@@ -182,7 +182,7 @@ const Publisher = {
             assoc('chId', chId),
             Sprites.channelState,
             Sprites.transition(xforms),
-            assocPath(['channel', 'sigs'], sigs))
+            Sprites.withSigs(sigs))
 
         assert(ChannelState.checkAvailSigs(sprites.channel),
             `Invalid signatures in withdrawalRequest:\n`
@@ -208,7 +208,7 @@ const Publisher = {
 
     /**
      * Returns the off-chain balance of the publisher,
-     * irregardless of its player index.
+     * regardless of its player index.
      *
      * It's meant to be a testing convenience, hence not chainable.
      * */

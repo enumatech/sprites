@@ -144,7 +144,7 @@ const Reader = {
             assoc('chId', chId),
             Sprites.channelState,
             Sprites.transition(xforms),
-            assocPath(['channel', 'sigs'], sigs))
+            Sprites.withSigs(sigs))
 
         assert(sprite.channel.round === round,
             `Invoice round doesn't match latest channel state:\n` +
@@ -182,7 +182,7 @@ const Reader = {
             assoc('chId', chId),
             Sprites.channelState,
             Sprites.transition(xforms),
-            assocPath(['channel', 'sigs'], sigs))
+            Sprites.withSigs(sigs))
 
         assert(sprites.channel.round === round,
             `Receipt round doesn't match latest channel state:\n` +
@@ -212,6 +212,18 @@ const Reader = {
         const {chId, channel: {round, sigs}} = sprites
         const withdrawalRequest = {chId, xforms, round, sigs}
         return {...rdr, sprites, withdrawalRequest}
+    }),
+
+    withdraw: curry(async (withdrawal, rdr) => {
+        const {chId, round, xforms, sigs} = withdrawal
+        const rdr0 = await Reader.channel(chId, rdr)
+        const sprites = await threadP(rdr0.sprites,
+            Sprites.transition(xforms),
+            Sprites.withSigs(sigs),
+            Sprites.save,
+            Sprites.updateAndWithdraw)
+
+        return {...rdr, sprites}
     })
 }
 

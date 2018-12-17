@@ -122,10 +122,10 @@ describe('Sprites paywall demo flow using APIs directly', () => {
                             await Reader.requestWithdraw(reader)
                         const {withdrawal} =
                             await Publisher.readerWithdraw(withdrawalRequest, publisher)
-                        // await Reader.withdraw(withdrawal, reader)
+                        await Reader.withdraw(withdrawal, reader)
                     })
 
-                    it.skip('their on-chain balance reflects the payment', () =>
+                    it('their on-chain balance reflects the payment', () =>
                         expect(balance(reader)).resolves
                             .toEqual(readerOpeningBalance - article.price))
                 })
