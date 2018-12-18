@@ -1,0 +1,41 @@
+@startuml
+title Publisher withdraw
+
+actor Reader as rdr
+'database "Reader's\n**Off-chain**\nChannel DB" as rdrDB
+
+box "Blockchain" #lightblue
+    participant "Everyone's\n**On-chain**\nChannel registry" as reg
+    participant "Token" as token
+end box
+
+box "Internet" #beige
+    control "Publisher server" as srv
+end box
+
+'database "Publisher's\n**Off-chain**\nChannel DB" as dbB
+actor Publisher as pub
+
+rdr -> reg: **createWithDeposit**
+reg -> rdr: ch0r-1
+rdr -> srv: **invoice(order)**\n/invoice
+srv -> rdr: //invoice// (payment & withdrawal request)\n  ch0r0\n  sigs: [__, pub]
+rdr -> srv: **processPayment(pay(invoice))**\n/payment\n  ch0r0\n  sigs: [rdr, pub]
+alt Increasing round number
+    == Publisher withdraw (round 0) ==
+    pub -> srv: **publisherWithdraw**\n/publisher-withdraw
+    srv -> reg: **updateAndWithdraw**\n  <color blue>ch0r0</color>\n  sigs(rdr)
+    == Reader withdraw (round 1) ==
+    rdr -> srv: **requestWithdraw**\n/reader-withdraw\n  ch0r1\n  sigs: [rdr, __]
+    srv -> rdr: //withdrawal//\n  ch0r1\n  sigs: [rdr, pub]
+    rdr -> reg: **updateAndWithdraw**\n  <color blue>ch0r1</color>\n  sigs(pub)
+else Same round number
+    == Reader withdraw (round 1) ==
+    rdr -> srv: **requestWithdraw**\n/reader-withdraw\n  ch0r1\n  sigs: [rdr, __]
+    srv -> rdr: //withdrawal//\n  ch0r1\n  sigs: [rdr, pub]
+    rdr -> reg: **updateAndWithdraw**\n  <color red>ch0r1</color>\n  sigs(pub)
+    == Publisher withdraw (round 1) ==
+    pub -> srv: **publisherWithdraw**\n/publisher-withdraw
+    srv -> reg: **updateAndWithdraw**\n  <color red>ch0r1</color>\n  sigs(rdr)
+end
+@enduml
