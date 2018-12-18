@@ -112,7 +112,7 @@ describe('Sprites paywall demo flow using APIs directly', () => {
             describe('when the Publisher withdraws', () => {
                 beforeAll(() => Publisher.publisherWithdraw(chId, publisher))
 
-                it('their on-chain balance reflects the payment', () =>
+                test('the article price is transferred to the publisher', () =>
                     expect(balance(publisher)).resolves
                         .toEqual(publisherOpeningBalance + article.price))
 
@@ -125,9 +125,32 @@ describe('Sprites paywall demo flow using APIs directly', () => {
                         await Reader.withdraw(withdrawal, reader)
                     })
 
-                    it('their on-chain balance reflects the payment', () =>
+                    test('the remaining channel balance is transferred to the reader', () =>
                         expect(balance(reader)).resolves
                             .toEqual(readerOpeningBalance - article.price))
+                })
+            })
+
+            describe('when the Reader withdraws', () => {
+                beforeAll(async () => {
+                    const {withdrawalRequest} =
+                        await Reader.requestWithdraw(reader)
+                    const {withdrawal} =
+                        await Publisher.readerWithdraw(withdrawalRequest, publisher)
+                    await Reader.withdraw(withdrawal, reader)
+                })
+
+                test('the remaining channel balance is transferred to the reader', () =>
+                    expect(balance(reader)).resolves
+                        .toEqual(readerOpeningBalance - article.price))
+
+                describe('and the Publisher withdraws too', () => {
+                    beforeAll(() => Publisher.publisherWithdraw(chId, publisher))
+
+                    test('the article price is transferred to the publisher', () =>
+                        expect(balance(publisher)).resolves
+                            .toEqual(publisherOpeningBalance + article.price))
+
                 })
             })
         })

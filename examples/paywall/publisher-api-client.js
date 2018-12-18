@@ -38,12 +38,11 @@ function makeJsonFetch(fetch) {
 
         if (response.ok) {
             if (has('message', result) && has('stack', result))
-                throw new Error(result.message)
+                throw new Error('[SERVER] ' + result.message)
             else
                 return result
         } else {
-            const error = JSON.stringify(result, null, 4)
-            throw new Error(result.message)
+            throw new Error(JSON.stringify(result, null, 4))
         }
     }
 }

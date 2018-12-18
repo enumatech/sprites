@@ -178,8 +178,8 @@ const Publisher = {
      * */
     readerWithdraw: curry(async (withdrawalRequest, publisher) => {
         const {chId, xforms, sigs} = withdrawalRequest
-        const sprites = await threadP(publisher.sprites,
-            assoc('chId', chId),
+        const sprites = await threadP(
+            {...publisher.sprites, chId},
             Sprites.channelState,
             Sprites.transition(xforms),
             Sprites.withSigs(sigs))

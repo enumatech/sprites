@@ -90,9 +90,10 @@ async function publisherWithdraw() {
 async function readerWithdraw() {
     const chId = reader.sprites.chId
     const {withdrawalRequest} = await Reader.requestWithdraw(reader)
-    const {withdrawn} = await publisher.readerWithdraw(withdrawalRequest)
-    console.log('withdrawn', withdrawn)
-    reader = await Reader.channel(chId, reader)
+    const withdrawal = await publisher.readerWithdraw(withdrawalRequest)
+    reader = await threadP(reader,
+        Reader.withdraw(withdrawal),
+        Reader.channel(chId))
     render()
 }
 
@@ -164,8 +165,7 @@ const Debug = ({reader, library, route = {}}) => {
         h3('Off-chain Sprites payment channel'),
         pre(inspect(omit(boringChannelFields, channel))),
         button({onclick: () => publisherWithdraw()}, 'Publisher withdraw'),
-        button({onclick: () => readerWithdraw(), disabled: true},
-            'Reader withdraw')
+        button({onclick: () => readerWithdraw()}, 'Reader withdraw')
     )
 }
 
