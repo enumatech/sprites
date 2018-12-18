@@ -33,6 +33,24 @@ describe('PublisherApi', () => {
     const mock = (method, result) =>
         method.mockImplementationOnce(() => result)
 
+    describe('.http', () => {
+        describe('on error', () => {
+            const errorMsg = 'Boom'
+            const errorServer = express()
+                .use('/', PublisherApi('<publisher>', Router())
+                    .get('/error', (req, res) =>
+                        res.json({
+                            message: errorMsg,
+                            stack: '<stack-trace>'
+                        })))
+            const api = PublisherApiClient(makeFetch(errorServer))
+
+            it('prefixes server error messages with "[SERVER]"', async () =>
+                expect(api.http.get('/error')).rejects
+                    .toMatchObject({message: `[SERVER] ${errorMsg}`}))
+        })
+    })
+
     describe('/config', () => {
         it('works', async () => {
             const config = {mock: "config"}

@@ -60,6 +60,7 @@ module.exports = (fetch) => {
     const http = makeApiFetch(fetch)
 
     return {
+        http, // expose underlying http client for testing
         config: async () => http.get('/config'),
         catalog: async () => http.get('/catalog'),
         invoice: async (order) => http.post('/invoice', order),
