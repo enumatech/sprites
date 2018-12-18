@@ -273,14 +273,13 @@ contract SpritesRegistry {
     public view onlyplayers(chId)
     returns (bool) {
         // Do not allow overpayment.
-        // TODO conversion? safe math?
         // We can't check for overpayment because the chain state might
         // not be up to date?
         // Verify the update does not include an overpayment needs to be done by client?
-        // assert(int(amount) <= int(other.deposit) + credits[0]);
+        // assert(int(amount) <= int(other.deposit) + credits[0]);  // TODO use safe math
 
         // Only update to states with larger round number
-        require(round > channels[chId].bestRound);
+        require(round >= channels[chId].bestRound);
 
         bytes32 stateHash = keccak256(
             abi.encodePacked(
