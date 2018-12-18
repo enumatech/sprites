@@ -6,10 +6,8 @@
 // https://www.enuma.io/
 // ----------------------------------------------------------------------------
 
-const {
-    isNil, curry, assoc, assocPath, project, values, prop
-} = require('ramda')
-const {update, thread, threadP} = require('sprites/lib/fp.js')
+const {curry, assoc, project, values, prop} = require('ramda')
+const {thread, threadP} = require('sprites/lib/fp.js')
 const assert = require('assert')
 const {inspect} = require('util')
 const {
@@ -24,6 +22,7 @@ const H = require('sprites/lib/test-helpers.js')
 const {address} = H
 const Sign = require('sprites/lib/sign.js')
 const ChannelState = require('sprites/lib/channel-state.js')
+const Paywall = require('./paywall.js')
 const Sprites = require('sprites')
 
 const Publisher = {
@@ -154,17 +153,12 @@ const Publisher = {
      * Withdraws accumulated payments to the blockchain.
      * */
     publisherWithdraw: curry(async (chId, publisher) => {
-        const spritesBefore = await threadP(
-            publisher,
-            Publisher.channel(chId),
-            prop('sprites'))
-
+        const spritesBefore = (await Paywall.channel(chId, publisher)).sprites
         const spritesAfter = await threadP(
             spritesBefore,
             Sprites.updateAndWithdraw,
             Sprites.channelState,
             Sprites.save)
-
         const ownIdx = Sprites.ownIdx(spritesAfter)
         const withdrawn =
             spritesAfter.channel.withdrawn[ownIdx] -
@@ -197,24 +191,6 @@ const Publisher = {
             sigs: signedSprites.channel.sigs
         }
         return {...publisher, sprites: signedSprites, withdrawal}
-    }),
-
-    channel: curry(async (chId, publisher) => {
-        return {
-            ...publisher,
-            sprites: await Sprites.channelState({...publisher.sprites, chId})
-        }
-    }),
-
-    /**
-     * Returns the off-chain balance of the publisher,
-     * regardless of its player index.
-     *
-     * It's meant to be a testing convenience, hence not chainable.
-     * */
-    balance: curry(async (chId, publisher) => {
-        const {sprites} = await Publisher.channel(chId, publisher)
-        return ChannelState.balance(Sprites.ownIdx(sprites), sprites.channel)
     })
 }
 

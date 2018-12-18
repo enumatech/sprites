@@ -10,6 +10,7 @@ const {indexBy, prop, assoc, dissoc, keys, identity} = require('ramda')
 const {thread, threadP} = require('sprites/lib/fp.js')
 const {ZERO_ADDR, makeProvider} = require('sprites/lib/test-helpers.js')
 const OffChainRegistry = require('sprites/lib/off-chain-registry.js')
+const Paywall = require('../paywall.js')
 const Reader = require('../reader.js')
 const Publisher = require('../publisher.js')
 const Sprites = require('sprites')
@@ -193,6 +194,23 @@ describe('Reader', () => {
                 })
             })
 
+            describe('.deposit', () => {
+                let reader1, initialBalance
+                const amt = 2
+
+                beforeAll(async () =>
+                    initialBalance = await Paywall.balance(chId, reader))
+
+                beforeAll(async () =>
+                    reader1 = await threadP(reader,
+                        Reader.approve(amt),
+                        Reader.deposit(amt)))
+
+                it('increases channel balance', () =>
+                    expect(Paywall.balance(chId, reader1)).resolves
+                        .toEqual(initialBalance + amt))
+            })
+
             describe('.order', () => {
                 it('contains channel ID as means to pay', async () => {
                     const {order} = Reader.order(articleId, reader)
@@ -223,10 +241,6 @@ describe('Reader', () => {
                 })
             })
 
-            describe('.channel', () => {
-                // FIXME Can be the same as Paywall.channel
-            })
-
             describe('.processReceipt', () => {
                 let paymentReceipt, receipt
 
@@ -242,7 +256,7 @@ describe('Reader', () => {
 
                 it('saves the channel state', async () => {
                     const {sprites: {channel}} =
-                        await Reader.channel(chId, reader)
+                        await Paywall.channel(chId, reader)
                     expect(channel.round).toEqual(paymentReceipt.payment.round)
                 })
 
@@ -306,9 +320,7 @@ describe('Reader', () => {
                         initialTokenBalance =
                             (await Sprites.tokenBalance(sprites)).tokenBalance
                         initialChannelBalance =
-                            await ChannelState.balance(
-                                Sprites.ownIdx(sprites),
-                                sprites.channel)
+                            await Paywall.balance(chId, reader)
                         const {withdrawal} =
                             await Publisher.readerWithdraw(
                                 withdrawalRequest, publisher)

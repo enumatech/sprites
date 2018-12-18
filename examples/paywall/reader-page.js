@@ -21,12 +21,13 @@ const LowStorage = require('lowdb/adapters/LocalStorage')
 const OffChainRegistry = require('sprites/lib/off-chain-registry.js')
 const Sign = require('sprites/lib/sign.js')
 const Sprites = require('sprites')
+const Paywall = require('./paywall.js')
 const Reader = require('./reader.js')
 const PublisherApiClient = require('./publisher-api-client.js')
 const dom = require('./dom.js')
 const {
     $, frag, disabled, div, span, p, pre, a, h1, h2, h3, table, tr, th, td,
-    button, img
+    form, input, label, button, img
 } = dom
 
 const serverPort = 3000
@@ -48,6 +49,13 @@ async function openChannel() {
     reader = await threadP(reader,
         Reader.approve(amount),
         Reader.firstDeposit(amount))
+    render()
+}
+
+async function deposit(amount) {
+    reader = await threadP(reader,
+        Reader.approve(amount),
+        Reader.deposit(amount))
     render()
 }
 
@@ -83,7 +91,7 @@ async function publisherWithdraw() {
     const chId = reader.sprites.chId
     const {withdrawn} = await publisher.publisherWithdraw(chId)
     console.log('withdrawn', withdrawn)
-    reader = await Reader.channel(chId, reader)
+    reader = await Paywall.channel(chId, reader)
     render()
 }
 
@@ -93,7 +101,7 @@ async function readerWithdraw() {
     const withdrawal = await publisher.readerWithdraw(withdrawalRequest)
     reader = await threadP(reader,
         Reader.withdraw(withdrawal),
-        Reader.channel(chId))
+        Paywall.channel(chId))
     render()
 }
 
@@ -158,6 +166,9 @@ const Debug = ({reader, library, route = {}}) => {
     if (isNil(reader)) return ''
     const {sprites: {channel = {}}} = reader
     const boringChannelFields = ['preimageHash', 'recipient', 'expiry', 'sigs']
+    const depositField = input({type: "number", id: 'deposit', style: 'width: 6em'})
+    const depositLabel = label({for: 'deposit'}, ' tokens ')
+    const onDeposit = () => deposit(parseInt(depositField.value))
 
     return div({class: 'debug'},
         h3('IDs of purchased articles'),
@@ -165,8 +176,10 @@ const Debug = ({reader, library, route = {}}) => {
         h3('Off-chain Sprites payment channel'),
         pre(inspect(omit(boringChannelFields, channel))),
         button({onclick: () => publisherWithdraw()}, 'Publisher withdraw'),
-        button({onclick: () => readerWithdraw()}, 'Reader withdraw')
-    )
+        button({onclick: () => readerWithdraw()}, 'Reader withdraw'),
+        form(
+            button({onclick: onDeposit}, 'Deposit'),
+            depositField, depositLabel))
 }
 
 const Views = (route) => {

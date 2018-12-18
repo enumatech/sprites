@@ -13,6 +13,7 @@ const {inspect} = require('util')
 const Web3Eth = require('web3-eth')
 const low = require('lowdb')
 const LowMem = require('lowdb/adapters/Memory')
+const Paywall = require('./paywall.js')
 const Sprites = require('sprites')
 const ChannelState = require('sprites/lib/channel-state.js')
 
@@ -41,7 +42,7 @@ const Reader = {
         }
         const chId = last(await sprites.offChainReg.with(publisher))
 
-        const maybeWithChannel = isNil(chId) ? identity : Reader.channel(chId)
+        const maybeWithChannel = isNil(chId) ? identity : Paywall.channel(chId)
         return maybeWithChannel(readerWithPaywall)
     }),
 
@@ -113,6 +114,17 @@ const Reader = {
         }
     }),
 
+    deposit: curry(async (amount, rdr) => {
+        const {sprites} = rdr
+        return {
+            ...rdr,
+            sprites: await threadP(sprites,
+                Sprites.deposit(amount),
+                Sprites.channelState,
+                Sprites.save)
+        }
+    }),
+
     /**
      * Order an article.
      *
@@ -159,11 +171,6 @@ const Reader = {
         const signedSprite = await Sprites.sign(sprite)
         const payment = {...invoice, sigs: signedSprite.channel.sigs}
         return {...rdr, sprites: signedSprite, payment}
-    }),
-
-    channel: curry(async (chId, rdr) => {
-        const sprites = await Sprites.channelState({...rdr.sprites, chId})
-        return {...rdr, sprites}
     }),
 
     processReceipt: curry(async (paymentReceipt, rdr) => {
@@ -222,7 +229,7 @@ const Reader = {
 
     withdraw: curry(async (withdrawal, rdr) => {
         const {chId, round, xforms, sigs} = withdrawal
-        const rdr0 = await Reader.channel(chId, rdr)
+        const rdr0 = await Paywall.channel(chId, rdr)
         const sprites = await threadP(rdr0.sprites,
             Sprites.transition(xforms),
             Sprites.withSigs(sigs),

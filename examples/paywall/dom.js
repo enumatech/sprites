@@ -101,6 +101,7 @@ const tr = H('tr')
 const th = H('th')
 const td = H('td')
 const form = H('form')
+const label = H('label')
 const input = H('input')
 const button = H('button')
 const img = H('img')
@@ -108,5 +109,5 @@ const img = H('img')
 module.exports = {
     element, fragment, append, clear, mount, setAttr, setAttrs, disabled,
     $, text, frag, elem, H, div, span, p, pre, a, h1, h2, h3, table, tr, th, td,
-    form, input, button, img
+    form, label, input, button, img
 }

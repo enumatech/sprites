@@ -14,6 +14,7 @@ const {thread, threadP, update, updatePath} = require('sprites/lib/fp.js')
 const ChannelState = require('sprites/lib/channel-state.js')
 const Sprites = require('sprites')
 const OffChainRegistry = require('sprites/lib/off-chain-registry.js')
+const Paywall = require('../paywall.js')
 const Publisher = require('../publisher.js')
 const Reader = require('../reader.js')
 
@@ -163,7 +164,7 @@ describe('Publisher', () => {
             let invoice, balanceBeforePayment
 
             beforeAll(async () => {
-                balanceBeforePayment = await Publisher.balance(chId, publisher)
+                balanceBeforePayment = await Paywall.balance(chId, publisher)
                 ;({invoice} = await Publisher.invoice(order, publisher))
             })
 
@@ -180,7 +181,7 @@ describe('Publisher', () => {
                         .rejects.toThrowError(/missing/i))
 
                 it('retains the channel balance', () =>
-                    expect(Publisher.balance(chId, publisher))
+                    expect(Paywall.balance(chId, publisher))
                         .resolves.toEqual(balanceBeforePayment))
             })
 
@@ -199,7 +200,7 @@ describe('Publisher', () => {
                 })
 
                 it('retains the channel balance', async () => {
-                    await expect(Publisher.balance(chId, publisher))
+                    await expect(Paywall.balance(chId, publisher))
                         .resolves.toEqual(balanceBeforePayment)
                 })
             })
@@ -212,7 +213,7 @@ describe('Publisher', () => {
                 let startRound, receipt, payment
 
                 beforeAll(async () => {
-                    const pw0 = await Publisher.channel(chId, publisher)
+                    const pw0 = await Paywall.channel(chId, publisher)
                     startRound = pw0.sprites.channel.round
                     ;({payment} = await Reader.pay(invoice, reader))
                     ;({paymentReceipt: receipt} =
@@ -236,12 +237,12 @@ describe('Publisher', () => {
                 })
 
                 it('increases the channel balance', async () => {
-                    await expect(Publisher.balance(chId, publisher))
+                    await expect(Paywall.balance(chId, publisher))
                         .resolves.toEqual(balanceBeforePayment + article.price)
                 })
 
                 it('saves the channel state', async () => {
-                    const {sprites} = await Publisher.channel(chId, publisher)
+                    const {sprites} = await Paywall.channel(chId, publisher)
 
                     expect(sprites.channel)
                         .toHaveProperty('round', startRound + 1)
@@ -292,7 +293,7 @@ describe('Publisher', () => {
 
                 describe('.publisherWithdraw', () => {
                     it('withdraws all payments', async () => {
-                        const {sprites} = await Publisher.channel(chId, publisher)
+                        const {sprites} = await Paywall.channel(chId, publisher)
                         const ownIdx = Sprites.ownIdx(sprites)
                         const {channel: {withdrawals, withdrawn}} = sprites
                         const expectToWithdraw =
@@ -335,19 +336,6 @@ describe('Publisher', () => {
                             .toBeDefined()
                     })
                 })
-            })
-        })
-
-        describe.skip('.channel', () => {
-            it('works', async () => {
-                const {sprites} = await Publisher.channel(chId, publisher)
-                const {channel} = sprites
-
-                expect(ChannelState.balance(Sprites.ownIdx(sprites), channel))
-                    .toEqual(article.price)
-
-                expect(ChannelState.balance(Sprites.otherIdx(sprites), channel))
-                    .toEqual(0)
             })
         })
     })
