@@ -13,6 +13,8 @@
   "scripts": {
     "start": "echo -e 'Follow the README, then start with:\n    overmind start'",
     "test": "jest --coverage",
+    "tapc": "time tap test/*.js -Rclassic -c | awk '/\\(.+:.+:.+\\)/{print \"at \"$0;next} /at:/,/stack:/{next} 1'",
+    "taps": "time tap test/*.js -Rspec",
     "deploy": "node ./deploy-demo.js | tee sprites-config.json",
     "publisher": "node ./publisher-server.js",
     "reader": "beefy reader-page.js --live --cwd public/ --debug=true",
@@ -48,6 +50,7 @@
     "browserify": "16.2.3",
     "jest": "23.6.0",
     "request": "2.88.0",
-    "supertest-fetch": "1.2.2"
+    "supertest-fetch": "1.2.2",
+    "tap": "^12.1.1"
   }
 }

@@ -30,7 +30,7 @@ mkShell rec {
      else [python glibcLocales]);
 
     shellHook = ''
-        export PATH="$PATH:$PWD/node_modules/.bin"
+        export PATH="$PATH:$PWD/node_modules/.bin:$PWD/examples/paywall/node_modules/.bin"
         export OVERMIND_CAN_DIE=keystore
         # export TEST_CHAIN=ipc:$(realpath ./test-chain.ipc)
         '';
