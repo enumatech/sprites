@@ -2,14 +2,17 @@ const tap = require('tap')
 const unexpected = require('unexpected')
 
 tap.Test.prototype.expect = async function (unexcpectedArgs, message, extra) {
-    const t_resolves = e =>
-        this.resolves(e, message, {...extra, found: '', wanted: e.message})
+    const extraWithFailMsg = e => ({...extra, found: '', wanted: e.message})
 
+    let expectation
     try {
-        return unexpected(...unexcpectedArgs).catch(t_resolves)
-    } catch (e) { // Handle synchronous throw, when `.catch()` cannot run
-        return t_resolves(e)
+        // `await` unifies sync and async throw
+        expectation = Promise.resolve(unexpected(...unexcpectedArgs))
+    } catch (e) {
+        return this.resolves(e, message, extraWithFailMsg(e))
     }
+
+    return this.resolves(expectation, message, extra)
 }
 
 tap.Test.prototype.expect.it = unexpected.it.bind(unexpected)
