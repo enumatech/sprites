@@ -26,9 +26,9 @@
     "ethereumjs-util": "^6.0.0",
     "lowdb": "1.0.0",
     "ramda": "0.26.1",
-    "web3-eth": "1.0.0-beta.34",
-    "web3-eth-abi": "1.0.0-beta.34",
-    "web3-eth-contract": "1.0.0-beta.34"
+    "web3-eth": "1.0.0-beta.37",
+    "web3-eth-abi": "1.0.0-beta.37",
+    "web3-eth-contract": "1.0.0-beta.37"
   },
   "devDependencies": {
     "jest": "23.6.0"

@@ -22,7 +22,7 @@ mkShell rec {
         grc # bin/solc-combined.sh -- color compilation errors and warnings
         go-ethereum # provides geth
         solc
-        nodejs-10_x
+        nodejs-11_x
     ] ++
     # compiling nodejs deps, like websocket, keccak, scrypt
     (if stdenv.isDarwin
