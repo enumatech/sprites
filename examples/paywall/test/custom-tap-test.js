@@ -7,7 +7,7 @@ t.test('D', async t => {
     t.same(D`1.23`, BigNumber('1.23'),
         `from template literal`)
 
-    t.same(D('1.23'), BigNumber('1.234'),
+    t.same(D('1.23'), BigNumber('1.23'),
         `from String`)
 
     t.throws(() => D(1.23), /number.*accurate.*string/i,
@@ -33,11 +33,9 @@ t.test('BigNumber assertion type', async t => {
 
 t.test('Unexpected integration', async t => {
     await t.test('passing assertions', async t => {
-        t.ok(await t.expect([1, 'to be', 1]),
+        await t.expect([1, 'to be', 1],
             'sync')
-
-        await t.resolves(
-            t.expect([Promise.resolve(1), 'to be fulfilled with', 1]),
+        await t.expect([Promise.resolve(1), 'to be fulfilled with', 1],
             'async')
     })
 
