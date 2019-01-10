@@ -30,6 +30,7 @@
   "dependencies": {
     "@awaitjs/express": "0.1.4",
     "@ungap/url-search-params": "0.1.1",
+    "bignumber.js": "^8.0.1",
     "body-parser": "1.18.3",
     "cors": "2.8.5",
     "errorhandler": "1.5.0",

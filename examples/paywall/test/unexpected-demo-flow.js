@@ -69,7 +69,8 @@ t.test('Paywall demo flow', {bail: true, timeout: 10 * 1000}, async t => {
     const {paymentReceipt} = await Publisher.processPayment(payment, publisher)
     const {receipt} = await Reader.processReceipt(paymentReceipt, reader)
     const {article: paidArticle} = await Publisher.getArticle(receipt, publisher)
-    await t.expect([paidArticle, 'to satisfy', {content}],
+    await t.expect(
+        [paidArticle, 'to satisfy', {content}],
         `Article content is readable`)
     await t.expect([
         Reader.library(reader), 'to be fulfilled with',
