@@ -3,15 +3,17 @@ const expect = require('unexpected')
 const BigNumber = require('bignumber.js')
 
 // t.runOnly = true
+// t.reporter('classic')
 
 async function run() {
-    const nop = () => 0
-    const err = (msg = '<boom>') => Error(msg)
     // @formatter:off
-    const exn = () => { throw err() }
+    // `bomb` is extracted to simplify automatic assertion message
+    const bomb = () => { throw Error() }
     // @formatter:on
-    const resolved = (x = 123) => Promise.resolve(x)
-    const rejected = (x = err()) => Promise.reject(x)
+    const exn = () => bomb()
+    const nop = () => 0
+    const resolved = () => Promise.resolve(123)
+    const rejected = () => Promise.reject(Error())
 
     await t.test('expect', async t => {
         await t.test('sync', async t => {
@@ -36,23 +38,23 @@ async function run() {
         })
     })
 
-    await t.only('t.expect (unexpected integration)', async t => {
-        // t.runOnly = true
+    await t.test('t.expect (unexpected integration)', async t => {
+        const toFail = {expectFail: true}
 
         await t.test('sync', async t => {
             t.expect([123, 'to be', 123])
-            t.expect([123, 'to be', 999], {expectFail: true})
+            t.expect([123, 'to be', 999], toFail)
             t.expect([exn, 'to throw'])
-            t.expect([exn, 'not to throw'], {expectFail: true})
-            t.expect([nop, 'to throw'], {expectFail: true})
+            t.expect([exn, 'not to throw'], toFail)
             t.expect([nop, 'not to throw'])
+            t.expect([nop, 'to throw'], toFail)
         })
 
-        await t.only('async', async t => {
+        await t.test('async', async t => {
             await t.expect([resolved, 'to be fulfilled'])
-            await t.expect([resolved, 'not to be fulfilled'], {expectFail: true})
+            await t.expect([resolved, 'to be rejected'], toFail)
             await t.expect([rejected, 'to be rejected'])
-            await t.expect([rejected, 'not to be rejected'], {expectFail: true})
+            await t.expect([rejected, 'to be fulfilled'], toFail)
         })
     })
 
@@ -68,20 +70,20 @@ async function run() {
     })
 
     await t.test('BigNumber assertion type', async t => {
-        await t.expect([1, 'to equal', 1],
+        t.expect([1, 'to equal', 1],
             'Number "to equal" still works')
 
-        await t.expect([1, 'not to equal', 2],
+        t.expect([1, 'not to equal', 2],
             'Number "not to equal" still works')
 
-        await t.expect([D`1`, 'to equal', D`1`])
-        await t.expect([D`1`, 'not to equal', D`2`])
+        t.expect([D`1`, 'to equal', D`1`])
+        t.expect([D`1`, 'not to equal', D`2`])
 
-        await t.expect([D`1`, 'to satisfy', D`1`])
-        await t.expect([D`1`, 'not to satisfy', D`2`])
+        t.expect([D`1`, 'to satisfy', D`1`])
+        t.expect([D`1`, 'not to satisfy', D`2`])
 
-        await t.expect([D`1`, 'to be less than', D`2`])
-        await t.expect([D`10`, 'not to be less than', D`5`])
+        t.expect([D`1`, 'to be less than', D`2`])
+        t.expect([D`10`, 'not to be less than', D`5`])
     })
 }
 
