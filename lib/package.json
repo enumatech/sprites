@@ -1,0 +1,36 @@
+{
+  "name": "sprites-channels",
+  "version": "1.0.0",
+  "description": "",
+  "main": "sprites.js",
+  "jest": {
+    "testEnvironment": "node",
+    "roots": [
+      "<rootDir>/",
+      "<rootDir>/../out/"
+    ]
+  },
+  "scripts": {
+    "start": "echo Nothing to start. Refer the README for instructions or run the tests with `yarn test`.",
+    "test": "jest --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/enumatech/sprites.git"
+  },
+  "homepage": "https://github.com/enumatech/sprites#readme",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ethereumjs-util": "^6.0.0",
+    "lowdb": "1.0.0",
+    "ramda": "0.26.1",
+    "web3-eth": "1.0.0-beta.34",
+    "web3-eth-abi": "1.0.0-beta.34",
+    "web3-eth-contract": "1.0.0-beta.34"
+  },
+  "devDependencies": {
+    "jest": "23.6.0"
+  }
+}

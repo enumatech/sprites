@@ -1,2 +1,2 @@
-reader: npm run reader
-publisher: npm run deploy && npm run publisher
+reader: yarn run reader
+publisher: yarn run deploy && yarn run publisher

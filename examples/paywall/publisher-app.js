@@ -6,15 +6,15 @@
 // https://www.enuma.io/
 // ----------------------------------------------------------------------------
 
-const {thread} = require('sprites/lib/fp.js')
+const {thread} = require('sprites-channels/fp.js')
 const Path = require('path')
 const Fs = require('fs')
-const Jayson = require('sprites/lib/jayson.js')
-const {makeProvider} = require('sprites/lib/test-helpers.js')
+const Jayson = require('sprites-channels/jayson.js')
+const {makeProvider} = require('sprites-channels/test-helpers.js')
 const low = require('lowdb')
 const LowFile = require('lowdb/adapters/FileAsync')
-const OffChainRegistry = require('sprites/lib/off-chain-registry.js')
-const Sprites = require('sprites')
+const OffChainRegistry = require('sprites-channels/off-chain-registry.js')
+const Sprites = require('sprites-channels')
 const Publisher = require('./publisher.js')
 const demoCatalog = require('./demo-catalog.js')
 

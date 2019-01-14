@@ -1,6 +1,7 @@
 node_modules/
 .overmind.sock
 pnpm-debug.log
+yarn-error.log
 out/
 .DS_Store
 keystore

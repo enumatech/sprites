@@ -32,13 +32,12 @@ Here is a sequence diagram for this process:
 Follow the installation instructions in the main [README](../../)
 and import the mnemonic sentence into MetaMask too!
 
-Install the Node.js dependencies which are specific to this example
-application:
+Make sure Node.js dependencies are installed:
 
 ```
 nix-shell
-cd examples/paywall
 npm install
+cd examples/paywall
 ```
 
 In this demo Alice and Eve can act as a _Reader_ and _Bob_ plays the
@@ -71,8 +70,8 @@ your browser and select the Alice account in your MetaMask.
 
 ### `publisher` process
 
-It deploys smart contracts with `npm run deploy` and starts a HTTP server
-with `npm run publisher`, exposing the Publisher API on http://localhost:3000.
+It deploys smart contracts with `yarn run deploy` and starts a HTTP server
+with `yarn run publisher`, exposing the Publisher API on http://localhost:3000.
 
 The addresses of the deployed contracts are saved into the
 `./sprites-config.json` file.

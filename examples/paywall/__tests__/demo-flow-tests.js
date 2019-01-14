@@ -6,11 +6,11 @@
 // https://www.enuma.io/
 // ----------------------------------------------------------------------------
 
-const {makeProvider} = require('sprites/lib/test-helpers.js')
+const {makeProvider} = require('sprites-channels/test-helpers.js')
 const {__, indexBy, prop, assocPath} = require('ramda')
-const {thread, threadP} = require('sprites/lib/fp.js')
-const Sprites = require('sprites')
-const OffChainRegistry = require('sprites/lib/off-chain-registry.js')
+const {thread, threadP} = require('sprites-channels/fp.js')
+const Sprites = require('sprites-channels')
+const OffChainRegistry = require('sprites-channels/off-chain-registry.js')
 const Publisher = require('../publisher.js')
 const Reader = require('../reader.js')
 

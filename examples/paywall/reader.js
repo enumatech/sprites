@@ -7,15 +7,15 @@
 // ----------------------------------------------------------------------------
 
 const {curry, assoc, assocPath, last, isNil, identity} = require('ramda')
-const {threadP} = require('sprites/lib/fp.js')
+const {threadP} = require('sprites-channels/fp.js')
 const assert = require('assert')
 const {inspect} = require('util')
 const Web3Eth = require('web3-eth')
 const low = require('lowdb')
 const LowMem = require('lowdb/adapters/Memory')
 const Paywall = require('./paywall.js')
-const Sprites = require('sprites')
-const ChannelState = require('sprites/lib/channel-state.js')
+const Sprites = require('sprites-channels')
+const ChannelState = require('sprites-channels/channel-state.js')
 
 const Reader = {
     make(opts={}) {

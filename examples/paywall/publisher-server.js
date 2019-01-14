@@ -6,11 +6,11 @@
 // https://www.enuma.io/
 // ----------------------------------------------------------------------------
 
-const {log} = require('sprites/lib/fp.js')
+const {log} = require('sprites-channels/fp.js')
 const express = require('express')
 const cors = require('cors')
 const errorhandler = require('errorhandler')
-const {waitForAccounts} = require('sprites/lib/test-helpers.js')
+const {waitForAccounts} = require('sprites-channels/test-helpers.js')
 const PublisherApp = require('./publisher-app.js')
 const PublisherApi = require('./publisher-api.js')
 const serverPort = 3000

@@ -7,7 +7,7 @@
 // ----------------------------------------------------------------------------
 
 const Web3Eth = require('web3-eth')
-const Sprites = require('sprites')
+const Sprites = require('sprites-channels')
 
 const ethUrl = 'http://localhost:8545'
 

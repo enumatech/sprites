@@ -7,8 +7,8 @@
 // ----------------------------------------------------------------------------
 
 const {curry} = require('ramda')
-const ChannelState = require('sprites/lib/channel-state.js')
-const Sprites = require('sprites')
+const ChannelState = require('sprites-channels/channel-state.js')
+const Sprites = require('sprites-channels')
 
 const Paywall = {
     /**

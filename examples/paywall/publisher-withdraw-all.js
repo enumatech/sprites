@@ -7,8 +7,8 @@
 // ----------------------------------------------------------------------------
 
 const {identity} = require('ramda')
-const {log} = require('sprites/lib/fp.js')
-const {waitForAccounts} = require('sprites/lib/test-helpers.js')
+const {log} = require('sprites-channels/fp.js')
+const {waitForAccounts} = require('sprites-channels/test-helpers.js')
 const Publisher = require('./publisher.js')
 const PublisherApp = require('./publisher-app.js')
 

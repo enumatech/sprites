@@ -7,14 +7,14 @@
 // ----------------------------------------------------------------------------
 
 const {indexBy, prop, assoc, dissoc, keys, identity} = require('ramda')
-const {thread, threadP} = require('sprites/lib/fp.js')
-const {ZERO_ADDR, makeProvider} = require('sprites/lib/test-helpers.js')
-const OffChainRegistry = require('sprites/lib/off-chain-registry.js')
+const {thread, threadP} = require('sprites-channels/fp.js')
+const {ZERO_ADDR, makeProvider} = require('sprites-channels/test-helpers.js')
+const OffChainRegistry = require('sprites-channels/off-chain-registry.js')
 const Paywall = require('../paywall.js')
 const Reader = require('../reader.js')
 const Publisher = require('../publisher.js')
-const Sprites = require('sprites')
-const ChannelState = require('sprites/lib/channel-state.js')
+const Sprites = require('sprites-channels')
+const ChannelState = require('sprites-channels/channel-state.js')
 
 describe('Reader', () => {
     let publisher, reader0, web3Provider

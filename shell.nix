@@ -23,6 +23,7 @@ mkShell rec {
         go-ethereum # provides geth
         solc
         nodejs-10_x
+        nodePackages_10_x.yarn
     ] ++
     # compiling nodejs deps, like websocket, keccak, scrypt
     (if stdenv.isDarwin

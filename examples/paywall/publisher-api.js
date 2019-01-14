@@ -9,7 +9,7 @@
 const bodyParser = require('body-parser')
 const {decorateApp} = require('@awaitjs/express')
 const Publisher = require('./publisher.js')
-const Jayson = require('sprites/lib/jayson')
+const Jayson = require('sprites-channels/jayson')
 
 /**
  * Returns the `router` object with API routes defined on it,

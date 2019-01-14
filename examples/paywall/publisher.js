@@ -7,7 +7,7 @@
 // ----------------------------------------------------------------------------
 
 const {curry, assoc, project, values, prop} = require('ramda')
-const {thread, threadP} = require('sprites/lib/fp.js')
+const {thread, threadP} = require('sprites-channels/fp.js')
 const assert = require('assert')
 const {inspect} = require('util')
 const {
@@ -18,12 +18,12 @@ const {
     toUnsigned,
     hashPersonalMessage
 } = require('ethereumjs-util')
-const H = require('sprites/lib/test-helpers.js')
+const H = require('sprites-channels/test-helpers.js')
 const {address} = H
-const Sign = require('sprites/lib/sign.js')
-const ChannelState = require('sprites/lib/channel-state.js')
+const Sign = require('sprites-channels/sign.js')
+const ChannelState = require('sprites-channels/channel-state.js')
 const Paywall = require('./paywall.js')
-const Sprites = require('sprites')
+const Sprites = require('sprites-channels')
 
 const Publisher = {
     make(opts) {

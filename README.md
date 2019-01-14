@@ -28,7 +28,7 @@ dependencies" are downloaded; subsequent `nix-shell`s should start
 in a few seconds.
 
 ```
-npm install
+yarn install
 overmind start
 ```
 
