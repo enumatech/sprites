@@ -1,0 +1,12 @@
+{
+  "name": "@enumatech/tap",
+  "version": "1.0.0",
+  "license": "ISC",
+  "author": "Tamas Herman <hermantamas@gmail.com> (https://github.com/onetom)",
+  "main": "tap.js",
+  "dependencies": {
+    "bignumber.js": "^8.0.2",
+    "tap": "^12.1.1",
+    "unexpected": "^11.0.0"
+  }
+}

@@ -1,4 +1,4 @@
 {
   "private": true,
-  "workspaces": ["lib", "examples/paywall"]
+  "workspaces": ["lib", "tap", "examples/paywall"]
 }

@@ -24,6 +24,7 @@
   "license": "ISC",
   "dependencies": {
     "ethereumjs-util": "^6.0.0",
+    "ethers": "^4.0.20",
     "lowdb": "1.0.0",
     "ramda": "0.26.1",
     "web3-eth": "1.0.0-beta.34",
@@ -31,6 +32,7 @@
     "web3-eth-contract": "1.0.0-beta.34"
   },
   "devDependencies": {
-    "jest": "23.6.0"
+    "jest": "23.6.0",
+    "@enumatech/tap": "1.0.0"
   }
 }
