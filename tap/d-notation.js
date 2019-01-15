@@ -1,4 +1,4 @@
-module.exports = function(global, BigNumber, inspect) {
+module.exports = function(BigNumber, inspect) {
     const inspectD = (value) => "D`" + value.toString() + "`"
 
     BigNumber.prototype[inspect.custom] = function () {
@@ -17,5 +17,5 @@ module.exports = function(global, BigNumber, inspect) {
         return BigNumber(value)
     }
 
-    global.D = D
+    return D
 }

@@ -1,5 +1,7 @@
-const t = require('../tap.js')
+const t = require('tap')
 const BigNumber = require('bignumber.js')
+const {inspect} = require('util')
+const D = require('../d-notation.js')(BigNumber, inspect)
 
 t.same(D`1.23`, BigNumber('1.23'),
     `from template literal`)
