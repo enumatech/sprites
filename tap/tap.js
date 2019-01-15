@@ -3,7 +3,7 @@ const unexpected = require('unexpected')
 const BigNumber = require('bignumber.js')
 const {inspect} = require('util')
 
-const D = require('./d-notation')(BigNumber, inspect)
+const D = require('./d-notation.js')(BigNumber, inspect)
 
 const extendedExpect =
     require('./unexpected-bignumber.js')(unexpected.clone(), BigNumber)
