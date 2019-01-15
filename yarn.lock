@@ -1725,10 +1725,9 @@ ethereumjs-util@^6.0.0:
     safe-buffer "^5.1.1"
     secp256k1 "^3.0.1"
 
-ethers@^4.0.20:
-  version "4.0.20"
-  resolved "https://registry.yarnpkg.com/ethers/-/ethers-4.0.20.tgz#2b072b283bb19f4870daf42cf5593e5375697504"
-  integrity sha512-1XEejqGYWlcXoVCPFPRfJmf1QQGHW7TNfprtdT1Up66nSuqWE/lYSLgvTNvH/nbSTMRFZqM6ANAbv/1+eUDb7g==
+ethers@enumatech/ethers.js#chunked-ipc:
+  version "4.0.21"
+  resolved "https://codeload.github.com/enumatech/ethers.js/tar.gz/31f3a71543d76b395552d6fab0134df7f0613194"
   dependencies:
     "@types/node" "^10.3.2"
     aes-js "3.0.0"
