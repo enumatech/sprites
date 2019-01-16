@@ -1,13 +1,10 @@
 module.exports = function (BigNumber, inspect) {
-    const inspectD = (value) => "D`" + value.toString() + "`"
-
-    BigNumber.prototype[inspect.custom] = function () {
-        return inspectD(this)
+    function inspectD() {
+        return "D`" + this.toString() + "`"
     }
 
-    BigNumber.prototype[Symbol.toPrimitive] = function () {
-        return inspectD(this)
-    }
+    BigNumber.prototype[inspect.custom] = inspectD
+    BigNumber.prototype[Symbol.toPrimitive] = inspectD
 
     // `D` stands for Decimal, just like in Python
     function D(value, ...params) {

@@ -3,9 +3,9 @@ module.exports = function (tap, expect) {
         async function (expectation, maybeMessage, extra) {
             const extraWithFailMsg = e => ({...extra, found: '', wanted: e.message})
             const maybeDont = extra.expectFail ? "don't" : ''
+            const [_subject, assertionStr] = expectation
             const message = maybeMessage ||
-                maybeDont + ' expect ' + expectation.join(' ')
-
+                maybeDont + ' expect ... ' + assertionStr + ' ...'
             let assertion
             try {
                 assertion = expect(...expectation)
