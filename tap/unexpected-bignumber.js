@@ -22,17 +22,29 @@ module.exports = function(expect, BigNumber) {
         }
     })
 
-    expect.addAssertion(
-        '<BigNumber> [not] to be (less than|below) <BigNumber>',
-        (expect, subject, value) => {
-            expect(subject.isLessThan(value), '[not] to be truthy')
-        })
+    const binaryOp = op => (expect, subject, value) => {
+        expect(subject[op](value), '[not] to be truthy')
+    }
 
     expect.addAssertion(
         '<BigNumber> [not] to satisfy <BigNumber>',
-        (expect, subject, value) => {
-            expect(subject.eq(value), '[not] to be truthy')
-        })
+        binaryOp('isEqualTo'))
+
+    expect.addAssertion(
+        '<BigNumber> [not] to be (greater than|above) <BigNumber>',
+        binaryOp('isGreaterThan'))
+
+    expect.addAssertion(
+        '<BigNumber> [not] to be greater than or equal to <BigNumber>',
+        binaryOp('isGreaterThanOrEqualTo'))
+
+    expect.addAssertion(
+        '<BigNumber> [not] to be (less than|below) <BigNumber>',
+        binaryOp('isLessThan'))
+
+    expect.addAssertion(
+        '<BigNumber> [not] to be less than or equal to <BigNumber>',
+        binaryOp('isLessThanOrEqualTo'))
 
     return expect
 }

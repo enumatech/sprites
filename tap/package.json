@@ -5,8 +5,11 @@
   "author": "Tamas Herman <hermantamas@gmail.com> (https://github.com/onetom)",
   "main": "tap.js",
   "dependencies": {
-    "bignumber.js": "^8.0.2",
     "tap": "^12.1.1",
     "unexpected": "^11.0.0"
+  },
+  "devDependencies": {
+    "bignumber.js": "^8.0.2",
+    "bn.js": "^4.11.8"
   }
 }

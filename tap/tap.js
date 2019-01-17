@@ -5,24 +5,31 @@ const {inspect} = require('util')
 /* Returns a function which accepts a BigNumber constructor,
 * which allows using ethers.js' own BigNumber implementation,
 * which is actually a non-decimal, BN variant. */
-module.exports = function ({BigNumber} = {}) {
-    BigNumber = BigNumber || require('bignumber.js')
-    const D = require('./d-notation.js')(BigNumber, inspect)
+module.exports = function ({BN, BigNumber} = {}) {
+    const expect = unexpected.clone()
 
-    const extendedExpect =
-        require('./unexpected-bignumber.js')(unexpected.clone(), BigNumber)
+    let D
+    if (BigNumber) {
+        D = require('./d-notation.js')(BigNumber, inspect)
+        require('./unexpected-bignumber.js')(expect, BigNumber)
+    }
 
-    const extendedTap =
-        require('./tap-unexpected.js')(tap, extendedExpect)
+    let I
+    if (BN) {
+        I = require('./i-notation.js')(BN, inspect)
+        require('./unexpected-bn.js')(expect, BN)
+    }
+
+    const t = require('./tap-unexpected.js')(tap, expect)
 
     return {
         tap,
         unexpected,
         BigNumber,
         D,
+        I,
         inspect,
-        expect: extendedExpect,
-        t: extendedTap
+        expect,
+        t
     }
 }
-
